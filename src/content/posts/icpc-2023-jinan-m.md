@@ -1,24 +1,21 @@
-
 ---
-
 title: 2023 ICPC 济南站 M 题 题解
 date: 2026-05-14
 tags: [ACM-ICPC, 题解, 计算几何]
 description: 本文详细讲解 2023 ICPC 亚洲区域赛济南站 M 题解题思路，包含凸包、极角排序等算法，并提供完整 C++ 实现代码。
-
 ---
 
 2023 ICPC 亚洲区域赛济南站 M 题
 
 [Problem - M - Codeforces](https://codeforces.com/gym/104901/problem/M)
 
-tag ： 计算几何
+tag : 计算几何
 
 首先求出 S 的凸包作为 P。 首先 P 本身就是可能的 Q，然后要统计所有满足 |Q| = |P| +1 的 Q。
 
 不难发现 Q 仍然要包含 P 的所有点，只能在 S 中再选一个 不是 P 的顶点的点作为 Q 的顶点。
 
-枚举新加的点 w，只能从 P 上选两个相邻的点 u 和 v，切断 u −v 然后连接 u−w 和 v−w。
+枚举新加的点 w，只能从 P 上选两个相邻的点 u 和 v，切断 u −v 然后连接 u − w 和 v − w。
 
 这要求 w,u,v 构成的三角形区域内没有其他 S 内的点。 问题转化为找出所有合法的 (w,u,v)。
 
@@ -70,7 +67,7 @@ vector<Point> Andrew(vector<Point> p) {
 db theta(Vec u) {
     return atan2(u.y, u.x);
 }
-// 预计算极角，减少常数
+// precompute polar angle to reduce constant
 void psort2(vector<Point>& p, Point c) {
     int n = p.size();
     vector<pair<db, int>> ang(n);
