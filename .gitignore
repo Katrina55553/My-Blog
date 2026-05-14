@@ -1,3 +1,9 @@
 node_modules/
 dist/
 .superpowers/
+.astro/
+.env
+.env.*
+*.log
+.DS_Store
+.claude/
