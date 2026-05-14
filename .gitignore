@@ -6,4 +6,9 @@ dist/
 .env.*
 *.log
 .DS_Store
+Thumbs.db
+*.swp
+*.swo
 .claude/
+PRD.md
+docs/
