@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://katrina-blog.example.com',
+  site: 'http://121.43.63.231',
   integrations: [sitemap()],
   markdown: {
     shikiConfig: {
