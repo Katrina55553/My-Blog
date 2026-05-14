@@ -2,5 +2,5 @@ services:
   blog:
     build: .
     ports:
-      - "8088:80"
+      - "8080:80"
     restart: unless-stopped
