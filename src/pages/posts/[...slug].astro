@@ -24,6 +24,17 @@ const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
 
 <BaseLayout title={title} description={description} pageType="article">
   <article class="py-8">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: title,
+      description: description,
+      datePublished: new Date(date).toISOString(),
+      author: {
+        '@type': 'Person',
+        name: 'Katrina',
+      },
+    })} />
     <header class="mb-8">
       <h1 class="text-3xl font-bold text-white mb-3">{title}</h1>
       <time class="text-sm text-slate-500 block mb-3">{formattedDate}</time>
