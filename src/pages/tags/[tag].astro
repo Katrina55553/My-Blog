@@ -1,0 +1,65 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const tagSet = new Set<string>();
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      tagSet.add(tag);
+    }
+  }
+  return [...tagSet].map((tag) => ({
+    params: { tag },
+  }));
+}
+
+const { tag } = Astro.params;
+const posts = await getCollection('posts');
+const filtered = posts
+  .filter((post) => post.data.tags.includes(tag!))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout title={`标签: #${tag}`} description={`Articles tagged with ${tag}`}>
+  <section class="py-12">
+    <h1 class="text-4xl font-bold text-white mb-2">
+      标签: <span class="text-cyan-400">#{tag}</span>
+    </h1>
+    <p class="text-lg text-slate-400 mb-8">{filtered.length} 篇文章</p>
+
+    <div class="space-y-6">
+      {filtered.map((post) => {
+        const { title, date, tags, description } = post.data;
+        const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+
+        return (
+          <article class="bg-slate-900 border border-slate-800 rounded-lg p-6 hover:border-slate-700 transition-colors">
+            <time class="text-sm text-slate-500 block mb-2">{formattedDate}</time>
+            <h2 class="text-xl font-bold text-white mb-2">
+              <a href={`/posts/${post.slug}`} class="text-white hover:text-cyan-400 transition-colors no-underline">
+                {title}
+              </a>
+            </h2>
+            <p class="text-slate-400 mb-3 leading-relaxed">{description}</p>
+            <div class="flex flex-wrap gap-2">
+              {tags.map((t: string) => (
+                <a
+                  href={`/tags/${t}`}
+                  class={`text-sm no-underline ${t === tag ? 'text-white font-medium' : 'text-cyan-400 hover:text-cyan-300'}`}
+                >
+                  #{t}
+                </a>
+              ))}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>
