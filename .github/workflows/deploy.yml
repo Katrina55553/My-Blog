@@ -8,13 +8,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
+      - name: Deploy to server
+        run: |
+          sudo apt-get install -y sshpass
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             cd ~/my-blog
             git pull
             docker compose up -d --build
+          "
