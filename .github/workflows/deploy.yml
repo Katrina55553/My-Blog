@@ -15,6 +15,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /path/to/my-blog
+            cd ~/my-blog
             git pull
             docker compose up -d --build
