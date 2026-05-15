@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@import "katex/dist/katex.css";
 
 @theme {
   --font-serif: Georgia, "Noto Serif SC", serif;
