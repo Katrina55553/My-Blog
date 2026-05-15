@@ -61,4 +61,24 @@ const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
       <Content />
     </div>
   </article>
+
+  <script>
+    document.querySelectorAll('pre.astro-code').forEach((pre) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'relative group';
+      pre.parentNode!.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement('button');
+      btn.className = 'absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-2 py-1 rounded';
+      btn.textContent = 'Copy';
+      btn.onclick = async () => {
+        const code = pre.querySelector('code')?.textContent || pre.textContent || '';
+        await navigator.clipboard.writeText(code);
+        btn.textContent = 'Copied!';
+        setTimeout(() => (btn.textContent = 'Copy'), 2000);
+      };
+      wrapper.appendChild(btn);
+    });
+  </script>
 </BaseLayout>
