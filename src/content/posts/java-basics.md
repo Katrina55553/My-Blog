@@ -1,7 +1,7 @@
 ---
 title: Java 基础
-date: 2026-05-15
-tags: [Java, 开发]
+date: 2026-01-07
+tags: [Java, 面向对象]
 description: Java 基础知识点梳理，涵盖面向对象（封装、继承、多态、抽象、接口）、核心关键字、Object 类方法以及异常处理。
 ---
 
