@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = await getCollection('posts');
+const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const grouped = new Map<number, typeof sorted>();
+for (const post of sorted) {
+  const year = new Date(post.data.date).getFullYear();
+  if (!grouped.has(year)) grouped.set(year, []);
+  grouped.get(year)!.push(post);
+}
+---
+
+<BaseLayout title="Archive" description="All articles on Katrina's blog">
+  <section class="py-12">
+    <h1 class="text-4xl font-bold text-white mb-8">Archive</h1>
+
+    <div class="space-y-10">
+      {[...grouped.entries()].map(([year, yearPosts]) => (
+        <div>
+          <h2 class="text-2xl font-bold text-slate-400 mb-4">{year}</h2>
+          <div class="space-y-3">
+            {yearPosts.map((post) => {
+              const { title, date, description } = post.data;
+              const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
+                month: 'long',
+                day: 'numeric',
+              });
+
+              return (
+                <article class="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-6 border-b border-slate-800 pb-3">
+                  <time class="text-sm text-slate-500 shrink-0">{formattedDate}</time>
+                  <div>
+                    <a
+                      href={`/posts/${post.slug}`}
+                      class="text-white hover:text-cyan-400 transition-colors no-underline font-medium"
+                    >
+                      {title}
+                    </a>
+                    <p class="text-sm text-slate-500 mt-1">{description}</p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
