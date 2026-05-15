@@ -1,7 +1,7 @@
 ---
 title: 2023 ICPC 济南站 M 题 题解
 date: 2026-05-14
-tags: [ACM-ICPC, 题解, 计算几何]
+tags: [ACM, 题解, 计算几何]
 description: 2023 ICPC 亚洲区域赛济南站 M 题解题思路，包含凸包、极角排序等算法，并提供 C++ 实现代码。
 ---
 
