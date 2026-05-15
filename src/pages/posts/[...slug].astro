@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PrevNext from '../../components/PrevNext.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -10,13 +11,19 @@ export async function getStaticPaths() {
   }));
 }
 
-const post = Astro.props;
+const current = Astro.props;
 
-const { Content } = await post.render();
-const { title, date, tags, description } = post.data;
+const posts = await getCollection('posts');
+const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const idx = sorted.findIndex((p) => p.slug === current.slug);
+const prev = idx > 0 ? sorted[idx - 1] : null;
+const next = idx < sorted.length - 1 ? sorted[idx + 1] : null;
+
+const { Content } = await current.render();
+const { title, date, tags, description } = current.data;
 
 // Reading time: ~300 chars/min for mixed CJK/English
-const chars = post.body?.replace(/[\s\n]/g, '').length || 0;
+const chars = current.body?.replace(/[\s\n]/g, '').length || 0;
 const minutes = Math.max(1, Math.round(chars / 300));
 
 const formattedDate = date.toLocaleDateString('zh-CN', {
@@ -68,6 +75,8 @@ const formattedDate = date.toLocaleDateString('zh-CN', {
     ">
       <Content />
     </div>
+
+    <PrevNext {prev} {next} />
   </article>
 
   <script>

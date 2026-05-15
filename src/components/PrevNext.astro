@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  prev: CollectionEntry<'posts'> | null;
+  next: CollectionEntry<'posts'> | null;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<nav class="mt-12 pt-6 border-t border-slate-800 grid grid-cols-2 gap-4">
+  {prev ? (
+    <a href={`/posts/${prev.slug}`} class="text-left no-underline group">
+      <span class="text-xs text-slate-500 block mb-1">← Previous</span>
+      <span class="text-sm text-slate-300 group-hover:text-cyan-400 transition-colors">{prev.data.title}</span>
+    </a>
+  ) : (
+    <div />
+  )}
+  {next ? (
+    <a href={`/posts/${next.slug}`} class="text-right no-underline group">
+      <span class="text-xs text-slate-500 block mb-1">Next →</span>
+      <span class="text-sm text-slate-300 group-hover:text-cyan-400 transition-colors">{next.data.title}</span>
+    </a>
+  ) : (
+    <div />
+  )}
+</nav>
