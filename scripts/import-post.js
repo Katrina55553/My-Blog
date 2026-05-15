@@ -7,7 +7,8 @@ if (!source) {
   process.exit(1);
 }
 
-const content = fs.readFileSync(source, 'utf-8');
+const sourceDir = path.dirname(source);
+let content = fs.readFileSync(source, 'utf-8');
 
 // Generate slug from filename
 const basename = path.basename(source, '.md');
@@ -17,14 +18,49 @@ const slug = basename
   .replace(/^-|-$/g, '')
   .toLowerCase();
 
-const dest = path.join('src', 'content', 'posts', `${slug}.md`);
-fs.mkdirSync(path.dirname(dest), { recursive: true });
+// Process Obsidian image embeds: ![[image.png]] or ![[subdir/image.png]]
+const imageRegex = /!\[\[([^\]]+?\.(?:png|jpg|jpeg|gif|svg|webp))\]\]/gi;
+const imagesDir = path.join('public', 'images');
+fs.mkdirSync(imagesDir, { recursive: true });
+
+content = content.replace(imageRegex, (fullMatch, imagePath) => {
+  const imageName = path.basename(imagePath);
+  const imageSlug = imageName
+    .replace(/[^\w.-]/g, '-')
+    .replace(/-+/g, '-')
+    .toLowerCase();
+
+  // Try to find the image relative to the source file
+  const candidates = [
+    path.join(sourceDir, imagePath),
+    path.join(sourceDir, imageName),
+  ];
+
+  let found = false;
+  for (const src of candidates) {
+    if (fs.existsSync(src)) {
+      const dest = path.join(imagesDir, imageSlug);
+      fs.copyFileSync(src, dest);
+      console.log(`  Copied image: ${imageSlug}`);
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    console.log(`  Warning: image not found — ${imagePath}`);
+  }
+
+  return `![${imageName}](/images/${imageSlug})`;
+});
 
 // Fix date format: 2026-5-14 -> 2026-05-14
-const fixed = content.replace(
+content = content.replace(
   /^date:\s*(\d{4})-(\d{1,2})-(\d{1,2})$/m,
   (_, y, m, d) => `date: ${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`
 );
 
-fs.writeFileSync(dest, fixed);
+const dest = path.join('src', 'content', 'posts', `${slug}.md`);
+fs.mkdirSync(path.dirname(dest), { recursive: true });
+fs.writeFileSync(dest, content);
 console.log(`Imported: ${dest}`);
