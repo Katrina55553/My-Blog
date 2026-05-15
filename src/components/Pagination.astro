@@ -1,0 +1,41 @@
+---
+interface Props {
+  current: number;
+  total: number;
+  base?: string;
+}
+
+const { current, total, base = '' } = Astro.props;
+
+function pageUrl(p: number) {
+  if (p === 1) return '/';
+  return `${base}page/${p}`;
+}
+---
+
+{total > 1 && (
+  <nav class="flex items-center justify-center gap-2 pt-8">
+    {current > 1 && (
+      <a href={pageUrl(current - 1)} class="px-3 py-1.5 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded transition-colors no-underline">
+        ← Prev
+      </a>
+    )}
+    {Array.from({ length: total }, (_, i) => i + 1).map((p) => (
+      <a
+        href={pageUrl(p)}
+        class={`px-3 py-1.5 text-sm rounded transition-colors no-underline ${
+          p === current
+            ? 'bg-cyan-500 text-slate-950 font-medium'
+            : 'text-slate-300 hover:text-cyan-400 hover:bg-slate-800'
+        }`}
+      >
+        {p}
+      </a>
+    ))}
+    {current < total && (
+      <a href={pageUrl(current + 1)} class="px-3 py-1.5 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded transition-colors no-underline">
+        Next →
+      </a>
+    )}
+  </nav>
+)}
