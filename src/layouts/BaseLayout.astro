@@ -23,8 +23,12 @@ const fullTitle = `${title} | Katrina's blog`;
     <meta property="og:description" content={description || "Katrina's personal blog"} />
     <meta property="og:type" content={pageType} />
     <meta property="og:url" content={Astro.url} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={new URL('/og-image.svg', Astro.url).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:image" content={new URL('/og-image.svg', Astro.url).href} />
     <link rel="canonical" href={Astro.url} />
   </head>
   <body class="bg-slate-950 text-slate-200 font-serif min-h-screen flex flex-col">
