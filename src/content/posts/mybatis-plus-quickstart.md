@@ -11,6 +11,8 @@ ORM（Object Relational Mapping，对象关系映射）是为了解决面向对�
 
 ORM 通过描述对象和数据库之间映射的元数据，将程序中的对象自动持久化到关系数据库中。ORM 框架的本质是简化编程中操作数据库的编码。
 
+![ORM](/images/orm.png)
+
 ## MyBatis-Plus 介绍
 
 MyBatis 是一款优秀的数据持久层 ORM 框架，能够灵活地实现动态 SQL，可以使用 XML 或注解来配置和映射原生信息，轻松地将 Java 的 POJO 与数据库中的表和字段进行映射关联。
@@ -56,6 +58,8 @@ mybatis-plus.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
 添加 `@MapperScan` 注解扫描 Mapper 接口。
 
 ## MyBatis CRUD 注解
+
+![MyBatis CRUD 注解](/images/mybatis-crud-.png)
 
 ```java
 @Mapper

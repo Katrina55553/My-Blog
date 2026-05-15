@@ -7,7 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "import": "node scripts/import-post.js"
+    "import": "node scripts/import-post.cjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.2",
