@@ -1,7 +1,7 @@
 ---
 title: MyBatis-Plus 快速上手
 date: 2026-05-15
-tags: [SpringBoot, MyBatis, ORM]
+tags: [开发, SpringBoot, MyBatis, ORM]
 description: 介绍 ORM 概念、MyBatis-Plus 的依赖配置和 CRUD 基本用法，对比传统 MyBatis 与 MyBatis-Plus 的代码差异。
 ---
 

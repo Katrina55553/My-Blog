@@ -40,7 +40,7 @@ const formattedDate = date.toLocaleDateString('zh-CN', {
       '@type': 'Article',
       headline: title,
       description: description,
-      datePublished: new Date(date).toISOString(),
+      datePublished: date.toISOString(),
       author: {
         '@type': 'Person',
         name: 'Katrina',

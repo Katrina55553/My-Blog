@@ -24,7 +24,7 @@ for (const post of sorted) {
           <div class="space-y-3">
             {yearPosts.map((post) => {
               const { title, date, description } = post.data;
-              const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
+              const formattedDate = date.toLocaleDateString('zh-CN', {
                 month: 'long',
                 day: 'numeric',
               });

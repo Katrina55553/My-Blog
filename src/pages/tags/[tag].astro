@@ -32,7 +32,7 @@ const filtered = posts
     <div class="space-y-6">
       {filtered.map((post) => {
         const { title, date, tags, description } = post.data;
-        const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
+        const formattedDate = date.toLocaleDateString('zh-CN', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
