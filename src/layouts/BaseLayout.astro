@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Search from '../components/Search.astro';
 
 interface Props {
   title: string;
@@ -71,6 +72,8 @@ const fullTitle = `${title} | Katrina's blog`;
         </div>
       </nav>
     </header>
+
+    <Search />
 
     <main class="flex-1 max-w-3xl mx-auto px-4 py-8 w-full">
       <slot />

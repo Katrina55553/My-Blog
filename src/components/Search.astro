@@ -1,0 +1,69 @@
+<div id="search" class="max-w-3xl mx-auto px-4 pb-4">
+  <div class="relative">
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Search articles..."
+      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 placeholder-slate-500
+             focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
+      autocomplete="off"
+    />
+    <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-20 max-h-80 overflow-y-auto">
+    </div>
+  </div>
+</div>
+
+<script>
+  let posts: { title: string; slug: string; tags: string[]; description: string }[] = [];
+  let loaded = false;
+
+  async function loadPosts() {
+    if (loaded) return;
+    try {
+      const res = await fetch('/search.json');
+      if (res.ok) posts = await res.json();
+    } catch (_) {}
+    loaded = true;
+  }
+
+  const input = document.getElementById('search-input') as HTMLInputElement;
+  const results = document.getElementById('search-results')!;
+
+  input.addEventListener('focus', loadPosts);
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) {
+      results.innerHTML = '';
+      results.classList.add('hidden');
+      return;
+    }
+    const filtered = posts.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.tags.some((t) => t.toLowerCase().includes(q)) ||
+        p.description.toLowerCase().includes(q),
+    );
+    if (filtered.length === 0) {
+      results.innerHTML = '<div class="px-4 py-3 text-sm text-slate-500">No results</div>';
+    } else {
+      results.innerHTML = filtered
+        .slice(0, 8)
+        .map(
+          (p) => `
+          <a href="/posts/${p.slug}" class="block px-4 py-3 hover:bg-slate-800 transition-colors no-underline border-b border-slate-800 last:border-0">
+            <div class="text-sm text-white font-medium">${p.title}</div>
+            <div class="text-xs text-slate-500 mt-1">${p.tags.map((t) => '#' + t).join(' ')}</div>
+          </a>
+        `,
+        )
+        .join('');
+    }
+    results.classList.remove('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('#search')) {
+      results.classList.add('hidden');
+    }
+  });
+</script>
