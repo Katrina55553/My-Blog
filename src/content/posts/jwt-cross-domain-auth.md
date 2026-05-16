@@ -1,7 +1,7 @@
 ---
 title: JWT 跨域认证
 date: 2026-05-10
-tags: [开发, JWT]
+tags: [前端, 后端, JWT]
 description: 从 Session 到 Token 再到 JWT，梳理三种认证方式的原理、优缺点和适用场景。
 ---
 
