@@ -9,7 +9,7 @@ const { current, total, base = '' } = Astro.props;
 
 function pageUrl(p: number) {
   if (p === 1) return '/';
-  return `${base}page/${p}`;
+  return `/${base}page/${p}`.replace(/\/+/g, '/');
 }
 ---
 
