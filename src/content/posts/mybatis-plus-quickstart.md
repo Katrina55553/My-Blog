@@ -1,7 +1,7 @@
 ---
 title: MyBatis-Plus 快速上手
 date: 2026-02-10
-tags: [开发, SpringBoot, MyBatis, ORM]
+tags: [后端, SpringBoot, MyBatis, ORM]
 description: 介绍 ORM 概念、MyBatis-Plus 的依赖配置和 CRUD 基本用法，对比传统 MyBatis 与 MyBatis-Plus 的代码差异。
 ---
 
@@ -9,7 +9,8 @@ description: 介绍 ORM 概念、MyBatis-Plus 的依赖配置和 CRUD 基本用�
 
 ORM（Object Relational Mapping，对象关系映射）是为了解决面向对象与关系数据库之间互不匹配现象的一种技术。
 
-ORM 通过描述对象和数据库之间映射的元数据，将程序中的对象自动持久化到关系数据库中。ORM 框架的本质是简化编程中操作数据库的编码。
+ORM 通过描述对象和数据库之间映射的元数据，将程序中的对象自动持久化到关系数据库中。
+ORM 框架的本质是简化编程中操作数据库的编码。
 
 ![ORM](/images/orm.png)
 

@@ -1,7 +1,7 @@
 ---
 title: 2023 ICPC 济南站 M 题 题解
-date: 2026-05-14
-tags: [ACM, 题解, 计算几何]
+date: 2026-05-12
+tags: [ACM, 题解]
 description: 2023 ICPC 亚洲区域赛济南站 M 题解题思路，包含凸包、极角排序等算法，并提供 C++ 实现代码。
 ---
 
@@ -9,7 +9,6 @@ description: 2023 ICPC 亚洲区域赛济南站 M 题解题思路，包含凸包
 
 [Problem - M - Codeforces](https://codeforces.com/gym/104901/problem/M)
 
-tag : 计算几何
 
 首先求出 S 的凸包作为 P。 首先 P 本身就是可能的 Q，然后要统计所有满足 |Q| = |P| +1 的 Q。
 

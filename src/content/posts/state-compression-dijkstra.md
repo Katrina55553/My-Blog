@@ -1,7 +1,7 @@
 ---
 title: 2025 码蹄杯国赛 MC0487·宝玉的考验 题解
 date: 2026-03-22
-tags: [码蹄杯, 题解, 状压DP, Dijkstra]
+tags: [码蹄杯, 题解]
 description: 结合状压 DP 与 Dijkstra 解决带有特殊点访问顺序约束的最短路问题，k ≤ 5 时状态空间可接受。
 ---
 

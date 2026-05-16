@@ -71,5 +71,13 @@ description: 文章摘要
 
 ## 工作流
 
-- 用户提供文章路径 → `npm run import` 导入到 `src/content/posts/` → `astro build` 验证 → commit + push
-- `scripts/import-post.js` 处理 Obsidian 笔记：自动生成 slug、修正日期格式、转换 `![[image]]` 并复制图片到 `public/images/`
+- 用户提供文章路径 → `npm run import` 导入到 `src/content/posts/`
+- `scripts/import-post.cjs` 处理 Obsidian 笔记：自动生成 slug、修正日期格式、转换 `![[image]]` 并递归搜索图片复制到 `public/images/`
+
+### 导入文章步骤
+
+1. 运行 `npm run import "<Obsidian笔记路径>"`
+2. 检查导入结果：为文章添加 frontmatter（title / date / tags / description），将 slug 中的中文替换为英文
+3. 运行 `astro build` 验证
+4. **等待用户确认**（用户需检查 tag 和时间是否正确）
+5. 用户确认后，再 commit + push
