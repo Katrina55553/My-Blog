@@ -1,5 +1,5 @@
 ---
-title: ST 表
+title: 蓝桥杯 2022 国 A 最大公约数 题解 —— ST 表 + 二分
 date: 2026-04-16
 tags: [蓝桥杯, 题解]
 description: ST 表（稀疏表）求区间 GCD，结合二分答案/双指针。
