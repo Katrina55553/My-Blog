@@ -8,6 +8,9 @@ description: 通过启发式合并（小集合合并到大集合）优化并查�
 [P16265 [蓝桥杯 2026 省 Python B 组] 蓝小圈 - 洛谷](https://www.luogu.com.cn/problem/P16265)
 
 
+当我们需要不断合并两个集合时，如果每次都把元素较少的集合合并到元素较多的集合，那么每个元素被移动的次数不会超过 O(logn) 次。
+
+
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
