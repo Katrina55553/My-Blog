@@ -8,11 +8,14 @@ description: 详细讲解三层架构(Controller/Service/Dao)和依赖注入(IoC
 ## 三层架构
 
 ● Controller : 控制层，接收前端发送的请求，对请求进行处理，并响应数据。
+
 ● Service : 业务逻辑层，处理具体的业务逻辑。
+
 ● Dao : 数据访问层 (Data Access Object) (持久层)，负责数据访问操作，包括数据的 CRUD。
 
 
 **Controller ↔ Service**：通常用 **VO**（View Object）或 **DTO**，返回前端需要的数据
+
  **Service ↔ Dao**：通常用 **PO**（Persistent Object） 或 **Entity**，与数据库表一一对应。
 
 
@@ -33,14 +36,18 @@ description: 详细讲解三层架构(Controller/Service/Dao)和依赖注入(IoC
 
 
 控制反转：Inversion of Control 简称 loC。
+
 对象的创建控制权由程序自身转移到外部（容器），这种思想称为控制反转。
 
 依赖注入：Dependency Injection 简称 Dl。
+
 容器为应用程序提供运行时，所依赖的资源，称之为依赖注入。
 
 
 **IoC是一种设计原则**，**DI是实现这个原则的设计模式**
 
+
+---
 
 
 Spring框架下：
