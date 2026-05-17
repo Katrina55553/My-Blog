@@ -1,6 +1,6 @@
 ---
 title: FastAPI 基础
-date: 2026-03-19
+date: 2026-01-19
 tags: [后端, FastAPI]
 description: FastAPI 基础入门教程，涵盖最简单的接口创建、请求参数处理（路径参数、查询参数、请求体）、响应类型设置等核心功能
 ---
