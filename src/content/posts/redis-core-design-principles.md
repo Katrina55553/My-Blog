@@ -1,7 +1,7 @@
 ---
 title: Redis 核心设计原理
 date: 2026-05-18
-tags: [Redis, 中间件, 架构设计]
+tags: [后端, Redis, 中间件, 架构设计]
 description: 深入解析 Redis 核心设计原理，包括数据结构、内存管理、持久化机制和单机架构设计
 ---
 
