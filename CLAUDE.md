@@ -66,7 +66,7 @@ description: 文章摘要
 
 - Docker + Nginx（多阶段构建）
 - GitHub Actions：push main → SSH 到服务器 → `git reset --hard` → `docker compose build --no-cache && up -d`
-- 服务器路径：`~/my-blog`，暴露端口 8080
+- 服务器路径：`~/my-blog`，暴露端口 80
 - Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_PASSWORD`
 
 ## 工作流

@@ -70,7 +70,7 @@ description: 文章摘要
 ## Docker 部署
 
 ```bash
-docker compose up -d --build    # http://localhost:8080
+docker compose up -d --build    # http://localhost
 ```
 
 GitHub Actions 在 push main 时自动部署到服务器。
