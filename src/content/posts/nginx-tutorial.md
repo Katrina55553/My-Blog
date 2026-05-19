@@ -1,7 +1,7 @@
 ---
 title: Nginx 入门教程
 date: 2026-05-18
-tags: [Nginx, 反向代理, 中间件]
+tags: [Nginx, 中间件]
 description: Nginx 入门教程，涵盖安装方式、配置文件结构、常用配置、反向代理、负载均衡、静态资源服务等核心功能
 ---
 
