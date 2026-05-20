@@ -248,3 +248,10 @@ try {
 ### 自定义异常
 
 直接继承 `Exception` 或 `RuntimeException` 来自定义异常。
+
+
+
+
+## 参考视频
+
+【Java面向对象编程丨老男孩IT教育】https://www.bilibili.com/video/BV1uE411r7ij?vd_source=ff4b1d4c42eea739695d4eb2df88faca
