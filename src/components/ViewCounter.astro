@@ -11,21 +11,48 @@ const websiteId = '6c99da40-95d4-4832-8aeb-ba2c2e508a7d';
     const el = document.getElementById(`vc-${slug}`);
     if (!el) return;
     const pageUrl = `/posts/${slug}`;
+    const CACHE_KEY = '__vc_data';
+    const TTL = 30 * 60 * 1000; // 30 minutes
 
-    // One fetch shared by all ViewCounter instances on the page
-    const cacheKey = '__vc_' + websiteId;
-    if (!window[cacheKey]) {
-      const now = Date.now();
-      window[cacheKey] = fetch(`/api/views/websites/${websiteId}/metrics?startAt=0&endAt=${now}&type=url`)
-        .then((r) => { if (!r.ok) throw new Error('bad status'); return r.json(); });
+    function display(entry) {
+      if (!entry || typeof entry.y !== 'number' || entry.y <= 0) { el.remove(); return; }
+      el.textContent = entry.y === 1 ? '1 view' : `${entry.y} views`;
     }
 
-    window[cacheKey]
-      .then((data) => {
-        const entry = data.find((item) => item.x === pageUrl);
-        if (!entry || typeof entry.y !== 'number' || entry.y <= 0) { el.remove(); return; }
-        el.textContent = entry.y === 1 ? '1 view' : `${entry.y} views`;
-      })
-      .catch(() => { el.remove(); });
+    function fetchAndCache() {
+      const now = Date.now();
+      return fetch(`/api/views/websites/${websiteId}/metrics?startAt=0&endAt=${now}&type=url`)
+        .then((r) => { if (!r.ok) throw new Error('bad status'); return r.json(); })
+        .then((data) => {
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now })); } catch (e) { /* quota exceeded, ignore */ }
+          return data;
+        });
+    }
+
+    function loadCache() {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const cached = JSON.parse(raw);
+        if (cached.data && cached.ts && (Date.now() - cached.ts) < TTL) return cached.data;
+      } catch (e) { /* corrupted, ignore */ }
+      return null;
+    }
+
+    const cached = loadCache();
+    if (cached) {
+      display(cached.find((item) => item.x === pageUrl));
+      return;
+    }
+
+    // One fetch shared by all ViewCounter instances on the page
+    const memKey = '__vc_p_' + websiteId;
+    if (!window[memKey]) {
+      window[memKey] = fetchAndCache().catch(() => []);
+    }
+
+    window[memKey].then((data) => {
+      display(data.find((item) => item.x === pageUrl));
+    });
   })();
 </script>
