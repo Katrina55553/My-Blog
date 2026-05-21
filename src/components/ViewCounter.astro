@@ -11,9 +11,16 @@ const websiteId = '6c99da40-95d4-4832-8aeb-ba2c2e508a7d';
     const el = document.getElementById(`vc-${slug}`);
     if (!el) return;
     const pageUrl = `/posts/${slug}`;
-    const now = Date.now();
-    fetch(`/api/views/websites/${websiteId}/metrics?startAt=0&endAt=${now}&type=url`)
-      .then((r) => { if (!r.ok) throw new Error('bad status'); return r.json(); })
+
+    // One fetch shared by all ViewCounter instances on the page
+    const cacheKey = '__vc_' + websiteId;
+    if (!window[cacheKey]) {
+      const now = Date.now();
+      window[cacheKey] = fetch(`/api/views/websites/${websiteId}/metrics?startAt=0&endAt=${now}&type=url`)
+        .then((r) => { if (!r.ok) throw new Error('bad status'); return r.json(); });
+    }
+
+    window[cacheKey]
       .then((data) => {
         const entry = data.find((item) => item.x === pageUrl);
         if (!entry || typeof entry.y !== 'number' || entry.y <= 0) { el.remove(); return; }
