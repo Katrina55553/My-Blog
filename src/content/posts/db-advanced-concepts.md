@@ -20,9 +20,9 @@ description: 数据库进阶内容，涵盖事务 ACID、并发控制、索引�
 
 ### 事务控制语句
 
-- `BEGIN TRANSACTION` — 事务开始
-- `COMMIT` — 事务提交，永久保存更改
-- `ROLLBACK` — 事务回滚，撤销更改
+- `begin transaction` — 事务开始
+- `commit` — 事务提交，永久保存更改
+- `rollback` — 事务回滚，撤销更改
 
 ## 并发控制
 
@@ -66,18 +66,18 @@ description: 数据库进阶内容，涵盖事务 ACID、并发控制、索引�
 ### 创建索引
 
 ```sql
-CREATE [UNIQUE][CLUSTER] INDEX 索引名 ON 表名（列名 次序）;
+create [unique][cluster] index 索引名 on 表名（列名 次序）;
 /*
-次序: ASC（升序，默认）, DESC（降序）
-UNIQUE: 唯一索引，每个索引值只对应唯一的数据记录
-CLUSTER: 聚簇索引，数据行按索引顺序存储
+次序: asc（升序，默认）, desc（降序）
+unique: 唯一索引，每个索引值只对应唯一的数据记录
+cluster: 聚簇索引，数据行按索引顺序存储
 */
 ```
 
 ### 删除索引
 
 ```sql
-DROP INDEX 索引名;
+drop index 索引名;
 ```
 
 ## 视图（View）
@@ -93,33 +93,33 @@ DROP INDEX 索引名;
 ### 创建视图
 
 ```sql
-CREATE VIEW 视图名 [(列名1, 列名2, ...)] AS 子查询 [WITH CHECK OPTION];
+create view 视图名 [(列名1, 列名2, ...)] as 子查询 [with check option];
 /*
-WITH CHECK OPTION: 通过视图修改（插入/更新）数据时，会检查修改后的数据是否仍然符合视图定义的条件。如果不符合，就拒绝修改。
+with check option: 通过视图修改（插入/更新）数据时，会检查修改后的数据是否仍然符合视图定义的条件。如果不符合，就拒绝修改。
 */
 ```
 
 ## 触发器（Trigger）
 
-触发器是在数据库表上定义的一种特殊存储过程，当特定事件（INSERT/UPDATE/DELETE）发生时自动执行。
+触发器是在数据库表上定义的一种特殊存储过程，当特定事件（insert/update/delete）发生时自动执行。
 
 ### 创建触发器
 
 ```sql
-CREATE TRIGGER 触发器名称 
-BEFORE|AFTER 
-DELETE|INSERT|UPDATE 
-ON 表名 
-FOR EACH ROW|FOR EACH STATEMENT
-WHEN 触发条件 
-BEGIN 
+create trigger 触发器名称 
+before|after 
+delete|insert|update 
+on 表名 
+for each row|for each statement
+when 触发条件 
+begin 
     <触发动作>
-END;
+end;
 
 /*
-BEFORE/AFTER：执行触发语句之前还是之后激发触发器
-FOR EACH ROW：行级触发器，对每一行执行一次
-FOR EACH STATEMENT：语句级触发器，对整个事件只执行一次（默认）
+before/after：执行触发语句之前还是之后激发触发器
+for each row：行级触发器，对每一行执行一次
+for each statement：语句级触发器，对整个事件只执行一次（默认）
 */
 ```
 
@@ -130,16 +130,16 @@ FOR EACH STATEMENT：语句级触发器，对整个事件只执行一次（默�
 ### 创建存储过程
 
 ```sql
-CREATE PROCEDURE 存储过程名 (参数列表)
-BEGIN
+create procedure 存储过程名 (参数列表)
+begin
     -- SQL 语句
-END;
+end;
 ```
 
 ### 调用存储过程
 
 ```sql
-CALL 存储过程名(参数);
+call 存储过程名(参数);
 ```
 
 ## 数据库恢复
@@ -165,30 +165,30 @@ CALL 存储过程名(参数);
 
 ```sql
 -- 创建索引
-CREATE UNIQUE INDEX idx_student_id ON students(id);
+create unique index idx_student_id on students(id);
 
 -- 创建视图
-CREATE VIEW v_active_students AS
-SELECT id, name FROM students WHERE status = 'active' WITH CHECK OPTION;
+create view v_active_students as
+select id, name from students where status = 'active' with check option;
 
 -- 创建触发器
-CREATE TRIGGER trg_before_insert
-BEFORE INSERT ON students
-FOR EACH ROW
-BEGIN
-    SET NEW.created_at = NOW();
-END;
+create trigger trg_before_insert
+before insert on students
+for each row
+begin
+    set new.created_at = now();
+end;
 
 -- 创建存储过程
-DELIMITER //
-CREATE PROCEDURE sp_get_student(IN sid INT)
-BEGIN
-    SELECT * FROM students WHERE id = sid;
-END//
-DELIMITER ;
+delimiter //
+create procedure sp_get_student(in sid int)
+begin
+    select * from students where id = sid;
+end//
+delimiter ;
 
 -- 调用存储过程
-CALL sp_get_student(1);
+call sp_get_student(1);
 ```
 
 ## 参考
