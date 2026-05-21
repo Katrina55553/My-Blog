@@ -13,13 +13,13 @@ const websiteId = '6c99da40-95d4-4832-8aeb-ba2c2e508a7d';
     const { slug: s, websiteId: wid } = el.dataset;
     const pageUrl = `/posts/${s}`;
     const now = Date.now();
-    const apiUrl = `/api/views/websites/${wid}/stats?startAt=0&endAt=${now}&url=${encodeURIComponent(pageUrl)}`;
+    const apiUrl = `/api/views/websites/${wid}/metrics?startAt=0&endAt=${now}&type=url`;
     fetch(apiUrl)
       .then((r) => { if (!r.ok) throw new Error('bad status'); return r.json(); })
-      .then((d) => {
-        const count = d.pageviews;
-        if (typeof count !== 'number' || count <= 0) { el.remove(); return; }
-        el.textContent = count === 1 ? '1 view' : `${count} views`;
+      .then((data) => {
+        const entry = data.find((item) => item.x === pageUrl);
+        if (!entry || typeof entry.y !== 'number' || entry.y <= 0) { el.remove(); return; }
+        el.textContent = entry.y === 1 ? '1 view' : `${entry.y} views`;
       })
       .catch(() => { el.remove(); });
   })();
