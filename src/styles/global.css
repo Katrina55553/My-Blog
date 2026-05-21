@@ -4,5 +4,71 @@
 
 @theme {
   --font-serif: Georgia, "Noto Serif SC", serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+}
+
+/* ===== Code Blocks ===== */
+pre.astro-code {
+  font-family: var(--font-mono);
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(135deg, #1b1c2b 0%, #181825 40%, #11111b 100%);
+  box-shadow:
+    0 2px 20px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  margin: 1.5rem 0;
+  padding: 2.5rem 1rem 1rem;
+  position: relative;
+  overflow-x: auto;
+}
+
+/* macOS-style header dots */
+pre.astro-code::before {
+  content: '';
+  position: absolute;
+  top: 0.875rem;
+  left: 1rem;
+  width: 0.6875rem;
+  height: 0.6875rem;
+  border-radius: 50%;
+  background: #ff5f56;
+  box-shadow:
+    1.25rem 0 0 #ffbd2e,
+    2.5rem 0 0 #27ca40;
+}
+
+pre.astro-code code {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+pre.astro-code code span {
+  font-family: inherit;
+}
+
+/* Scrollbar */
+pre.astro-code::-webkit-scrollbar {
+  height: 6px;
+}
+pre.astro-code::-webkit-scrollbar-track {
+  background: transparent;
+}
+pre.astro-code::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+/* ===== Inline Code ===== */
+:not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  border-radius: 0.3rem;
+  background: rgba(99, 110, 123, 0.15);
+  color: #7dcfff;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }

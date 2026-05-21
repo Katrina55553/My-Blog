@@ -69,9 +69,7 @@ const formattedDate = date.toLocaleDateString('zh-CN', {
       prose-headings:text-white prose-headings:font-serif
       prose-p:text-slate-300 prose-p:leading-relaxed
       prose-a:text-cyan-400 prose-a:no-underline hover:prose-a:text-cyan-300
-      prose-code:text-cyan-300 prose-code:bg-slate-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
       prose-code:before:content-none prose-code:after:content-none
-      prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800
       prose-img:rounded-lg
     ">
       <Content />
@@ -88,7 +86,7 @@ const formattedDate = date.toLocaleDateString('zh-CN', {
       wrapper.appendChild(pre);
 
       const btn = document.createElement('button');
-      btn.className = 'absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-2 py-1 rounded';
+      btn.className = 'absolute top-2.5 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 backdrop-blur border border-white/5';
       btn.textContent = 'Copy';
       btn.onclick = () => {
         const code = pre.querySelector('code')?.textContent || pre.textContent || '';
