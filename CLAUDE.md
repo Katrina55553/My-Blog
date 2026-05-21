@@ -81,3 +81,4 @@ description: 文章摘要
 3. 运行 `astro build` 验证
 4. **等待用户确认**（用户需检查 tag 和时间是否正确）
 5. 用户确认后，再 commit + push
+6. commit 时使用 `<<'EOF'` heredoc 语法，**不要**使用 `@'...'@`（后者会让 `@` 成为 commit message 的一部分）
