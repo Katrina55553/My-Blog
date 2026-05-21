@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Pagination from '../components/Pagination.astro';
+import ViewCounter from '../components/ViewCounter.astro';
 
 const posts = await getCollection('posts');
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -36,7 +37,11 @@ const pagePosts = sorted.slice(0, perPage);
 
         return (
           <article class="bg-slate-900 border border-slate-800 rounded-lg p-6 hover:border-slate-700 transition-colors">
-            <time class="text-sm text-slate-500 block mb-2">{formattedDate}</time>
+            <div class="text-sm text-slate-500 flex items-center gap-2 mb-2">
+              <time>{formattedDate}</time>
+              <span>·</span>
+              <ViewCounter slug={post.slug} />
+            </div>
             <h2 class="text-xl font-bold text-white mb-2">
               <a href={`/posts/${post.slug}`} class="text-white hover:text-cyan-400 transition-colors no-underline">
                 {title}

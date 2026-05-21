@@ -3,18 +3,16 @@ const { slug } = Astro.props;
 const websiteId = '6c99da40-95d4-4832-8aeb-ba2c2e508a7d';
 ---
 
-<span id="view-counter" class="text-sm text-slate-500" data-slug={slug} data-website-id={websiteId}>
+<span id={`vc-${slug}`} class="text-sm text-slate-500">
   &mdash;
 </span>
-<script>
+<script define:vars={{ slug, websiteId }}>
   (() => {
-    const el = document.getElementById('view-counter');
+    const el = document.getElementById(`vc-${slug}`);
     if (!el) return;
-    const { slug: s, websiteId: wid } = el.dataset;
-    const pageUrl = `/posts/${s}`;
+    const pageUrl = `/posts/${slug}`;
     const now = Date.now();
-    const apiUrl = `/api/views/websites/${wid}/metrics?startAt=0&endAt=${now}&type=url`;
-    fetch(apiUrl)
+    fetch(`/api/views/websites/${websiteId}/metrics?startAt=0&endAt=${now}&type=url`)
       .then((r) => { if (!r.ok) throw new Error('bad status'); return r.json(); })
       .then((data) => {
         const entry = data.find((item) => item.x === pageUrl);
