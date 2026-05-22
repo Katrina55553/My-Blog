@@ -7,9 +7,10 @@ interface Props {
   description?: string;
   pageType?: 'website' | 'article';
   wide?: boolean;
+  showSearch?: boolean;
 }
 
-const { title, description, pageType = 'website', wide = false } = Astro.props;
+const { title, description, pageType = 'website', wide = false, showSearch = true } = Astro.props;
 const fullTitle = `${title} | Katrina's blog`;
 ---
 
@@ -80,9 +81,11 @@ const fullTitle = `${title} | Katrina's blog`;
     </header>
 
     <main class={`flex-1 mx-auto px-4 py-8 w-full ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
-      <div class="max-w-3xl mx-auto">
-        <Search />
-      </div>
+      {showSearch && (
+        <div class="max-w-3xl mx-auto">
+          <Search />
+        </div>
+      )}
       <slot />
     </main>
 
