@@ -80,7 +80,9 @@ const fullTitle = `${title} | Katrina's blog`;
     </header>
 
     <main class={`flex-1 mx-auto px-4 py-8 w-full ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
-      <Search />
+      <div class="max-w-3xl mx-auto">
+        <Search />
+      </div>
       <slot />
     </main>
 
