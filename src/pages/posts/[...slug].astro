@@ -70,7 +70,7 @@ function extractHeadings(raw: string): TocHeading[] {
 const tocHeadings = extractHeadings(current.body || '');
 ---
 
-<BaseLayout title={title} description={description} pageType="article" wide showSearch={false}>
+<BaseLayout title={title} description={description} pageType="article" wide>
   <div class="flex justify-center gap-3">
     <!-- 主内容区 -->
     <div class="min-w-0 flex-1 max-w-3xl">

@@ -1,16 +1,14 @@
 ---
 import '../styles/global.css';
-import Search from '../components/Search.astro';
 
 interface Props {
   title: string;
   description?: string;
   pageType?: 'website' | 'article';
   wide?: boolean;
-  showSearch?: boolean;
 }
 
-const { title, description, pageType = 'website', wide = false, showSearch = true } = Astro.props;
+const { title, description, pageType = 'website', wide = false } = Astro.props;
 const fullTitle = `${title} | Katrina's blog`;
 ---
 
@@ -36,17 +34,35 @@ const fullTitle = `${title} | Katrina's blog`;
   </head>
   <body class="bg-slate-950 text-slate-200 font-serif min-h-screen flex flex-col">
     <header class="sticky top-0 z-10 bg-slate-950/80 backdrop-blur border-b border-slate-800">
-      <nav class={`mx-auto px-4 h-14 flex items-center justify-between ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
-        <a href="/" class="text-lg font-semibold text-white hover:text-cyan-400 transition-colors no-underline">
+      <nav class={`mx-auto px-4 h-14 flex items-center gap-3 ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
+        <a href="/" class="text-lg font-semibold text-white hover:text-cyan-400 transition-colors no-underline shrink-0">
           Katrina's blog
         </a>
 
+        <!-- Search bar in nav -->
+        <div id="search" class="flex-1 max-w-sm hidden md:block">
+          <div class="relative">
+            <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search..."
+              class="w-full bg-slate-900/80 border border-slate-700 hover:border-slate-600 rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-200 placeholder-slate-500
+                     focus:outline-none focus:border-cyan-500 focus:bg-slate-900 transition-all"
+              autocomplete="off"
+            />
+            <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 max-h-80 overflow-y-auto">
+            </div>
+          </div>
+        </div>
+
         <!-- Desktop nav -->
-        <div class="hidden md:flex gap-6 text-sm">
+        <div class="hidden md:flex gap-5 text-sm shrink-0">
           <a href="/" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline">Home</a>
           <a href="/popular" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline">Popular</a>
           <a href="/archive" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline">Archive</a>
-          <a href="/about" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline">About</a>
           <a href="/tags" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline">Tags</a>
           <a href="https://github.com/Katrina55553/My-Blog" target="_blank" rel="noopener noreferrer" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline" aria-label="GitHub">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -56,7 +72,7 @@ const fullTitle = `${title} | Katrina's blog`;
         </div>
 
         <!-- Mobile hamburger -->
-        <div class="md:hidden flex items-center">
+        <div class="md:hidden flex items-center ml-auto">
           <input type="checkbox" id="menu-toggle" class="peer sr-only" />
           <label for="menu-toggle" class="cursor-pointer p-2 block peer-checked:hidden" aria-label="Open menu">
             <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,10 +85,27 @@ const fullTitle = `${title} | Katrina's blog`;
             </svg>
           </label>
           <div class="hidden peer-checked:block absolute top-14 right-0 left-0 bg-slate-900 border-b border-slate-800 shadow-lg">
+            <!-- Mobile search -->
+            <div class="px-4 py-3">
+              <div class="relative">
+                <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  id="search-input-mobile"
+                  placeholder="Search..."
+                  class="w-full bg-slate-900/80 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500
+                         focus:outline-none focus:border-cyan-500 transition-all"
+                  autocomplete="off"
+                />
+                <div id="search-results-mobile" class="hidden absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 max-h-64 overflow-y-auto">
+                </div>
+              </div>
+            </div>
             <a href="/" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">Home</a>
             <a href="/popular" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">Popular</a>
             <a href="/archive" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">Archive</a>
-            <a href="/about" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">About</a>
             <a href="/tags" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">Tags</a>
             <a href="https://github.com/Katrina55553/My-Blog" target="_blank" rel="noopener noreferrer" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">GitHub</a>
           </div>
@@ -81,16 +114,72 @@ const fullTitle = `${title} | Katrina's blog`;
     </header>
 
     <main class={`flex-1 mx-auto px-4 py-8 w-full ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
-      {showSearch && (
-        <div class="max-w-3xl mx-auto">
-          <Search />
-        </div>
-      )}
       <slot />
     </main>
 
     <footer class="border-t border-slate-800 py-6 text-center text-sm text-slate-500">
       &copy; {new Date().getFullYear()} Katrina's blog
     </footer>
+
+    <script>
+      let posts: { title: string; slug: string; tags: string[]; description: string }[] = [];
+      let loaded = false;
+
+      async function loadPosts() {
+        if (loaded) return;
+        try {
+          const res = await fetch('/search.json');
+          if (res.ok) posts = await res.json();
+        } catch (_) {}
+        loaded = true;
+      }
+
+      function setupSearch(inputId: string, resultsId: string) {
+        const input = document.getElementById(inputId) as HTMLInputElement | null;
+        const results = document.getElementById(resultsId);
+        if (!input || !results) return;
+
+        input.addEventListener('focus', loadPosts);
+        input.addEventListener('input', () => {
+          const q = input.value.trim().toLowerCase();
+          if (!q) {
+            results.innerHTML = '';
+            results.classList.add('hidden');
+            return;
+          }
+          const filtered = posts.filter(
+            (p) =>
+              p.title.toLowerCase().includes(q) ||
+              p.tags.some((t) => t.toLowerCase().includes(q)) ||
+              p.description.toLowerCase().includes(q),
+          );
+          if (filtered.length === 0) {
+            results.innerHTML = '<div class="px-4 py-3 text-sm text-slate-500">No results</div>';
+          } else {
+            results.innerHTML = filtered
+              .slice(0, 8)
+              .map(
+                (p) => `
+                <a href="/posts/${p.slug}" class="block px-4 py-3 hover:bg-slate-800 transition-colors no-underline border-b border-slate-800 last:border-0">
+                  <div class="text-sm text-white font-medium">${p.title}</div>
+                  <div class="text-xs text-slate-500 mt-1">${p.tags.map((t) => '#' + t).join(' ')}</div>
+                </a>
+              `,
+              )
+              .join('');
+          }
+          results.classList.remove('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!(e.target as HTMLElement).closest(`#${CSS.escape(inputId)}`) && !(e.target as HTMLElement).closest(`#${CSS.escape(resultsId)}`)) {
+            results.classList.add('hidden');
+          }
+        });
+      }
+
+      setupSearch('search-input', 'search-results');
+      setupSearch('search-input-mobile', 'search-results-mobile');
+    </script>
   </body>
 </html>
