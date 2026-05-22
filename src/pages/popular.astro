@@ -11,7 +11,10 @@ const websiteId = '6c99da40-95d4-4832-8aeb-ba2c2e508a7d';
 
 <BaseLayout title="Popular" description="Most viewed articles on Katrina's blog">
   <section class="py-12">
-    <h1 class="text-4xl font-bold text-white mb-8">Popular</h1>
+    <h1 class="text-4xl font-bold text-white mb-8">
+      Popular
+      <span id="total-views" class="text-lg font-normal text-slate-500 ml-2">&mdash;</span>
+    </h1>
     <div id="popular-list" class="space-y-4">
       <p class="text-slate-500">Loading...</p>
     </div>
@@ -33,6 +36,10 @@ const websiteId = '6c99da40-95d4-4832-8aeb-ba2c2e508a7d';
           return { slug, ...meta, views };
         })
         .sort((a, b) => b.views - a.views);
+
+      const total = list.reduce((sum, p) => sum + p.views, 0);
+      const tv = document.getElementById('total-views');
+      if (tv) tv.textContent = total > 0 ? `(${total.toLocaleString()} total views)` : '';
 
       if (list.length === 0) {
         container.innerHTML = '<p class="text-slate-500">No posts yet.</p>';
