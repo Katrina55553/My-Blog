@@ -71,9 +71,9 @@ const tocHeadings = extractHeadings(current.body || '');
 ---
 
 <BaseLayout title={title} description={description} pageType="article" wide>
-  <div class="flex gap-6 xl:gap-8">
+  <div class="flex justify-center gap-6 xl:gap-8">
     <!-- 主内容区 -->
-    <div class="min-w-0 flex-1">
+    <div class="min-w-0 flex-1 max-w-3xl">
       <article class="py-8">
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
