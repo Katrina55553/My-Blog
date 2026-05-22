@@ -98,7 +98,7 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
     const THRESHOLD = 100;
 
     function findActiveHeading() {
-      // 在所有标题中查找当前处于视口内的标题（top 在视口内、bottom 在 threshold 以下）
+      // 在所有标题中查找当前处于视口内的标题
       const visible = headings
         .filter((h) => {
           const rect = h.getBoundingClientRect();
@@ -116,7 +116,7 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
           return headings[i].id;
         }
       }
-      return null;
+      return headings[0] ? headings[0].id : null;
     }
 
     function highlightLink(id) {
@@ -130,13 +130,16 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
       });
     }
 
-    // 任一回调触发时，重新检查全部标题的当前位置
-    const observer = new IntersectionObserver(
-      () => highlightLink(findActiveHeading()),
-      { rootMargin: `-${THRESHOLD}px 0px 0px 0px` }
-    );
-
-    headings.forEach((h) => observer.observe(h));
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          highlightLink(findActiveHeading());
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
 
     // 页面加载时设置初始高亮
     highlightLink(findActiveHeading());
