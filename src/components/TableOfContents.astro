@@ -97,40 +97,49 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
 
     const THRESHOLD = 100;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    function findActiveHeading() {
+      // 在所有标题中查找当前处于视口内的标题（top 在视口内、bottom 在 threshold 以下）
+      const visible = headings
+        .filter((h) => {
+          const rect = h.getBoundingClientRect();
+          return rect.top < window.innerHeight && rect.bottom > THRESHOLD;
+        })
+        .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
 
-        let activeId = null;
+      if (visible.length > 0) {
+        return visible[0].id;
+      }
 
-        if (visible.length > 0) {
-          activeId = visible[0].target.id;
+      // 没有标题在视口内：反向查找最后一个已滚过 threshold 的标题
+      for (let i = headings.length - 1; i >= 0; i--) {
+        if (headings[i].getBoundingClientRect().top <= THRESHOLD) {
+          return headings[i].id;
+        }
+      }
+      return null;
+    }
+
+    function highlightLink(id) {
+      if (!id) return;
+      links.forEach((l) => {
+        if (l.getAttribute('href') === `#${id}`) {
+          l.classList.add('toc-active');
         } else {
-          // 没有标题在视口内时，反向查找最后一个已滚过 threshold 的标题
-          for (let i = headings.length - 1; i >= 0; i--) {
-            if (headings[i].getBoundingClientRect().top <= THRESHOLD) {
-              activeId = headings[i].id;
-              break;
-            }
-          }
+          l.classList.remove('toc-active');
         }
+      });
+    }
 
-        if (activeId) {
-          links.forEach((l) => {
-            if (l.getAttribute('href') === `#${activeId}`) {
-              l.classList.add('toc-active');
-            } else {
-              l.classList.remove('toc-active');
-            }
-          });
-        }
-      },
+    // 任一回调触发时，重新检查全部标题的当前位置
+    const observer = new IntersectionObserver(
+      () => highlightLink(findActiveHeading()),
       { rootMargin: `-${THRESHOLD}px 0px 0px 0px` }
     );
 
     headings.forEach((h) => observer.observe(h));
+
+    // 页面加载时设置初始高亮
+    highlightLink(findActiveHeading());
   })();
 </script>
 
