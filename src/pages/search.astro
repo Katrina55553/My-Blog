@@ -12,28 +12,6 @@ for (const post of sorted) {
   grouped.get(year)!.push(post);
 }
 
-interface PostItem {
-  title: string;
-  slug: string;
-  tags: string[];
-  description: string;
-  date: string;
-  year: number;
-  monthDay: string;
-}
-
-const allPosts: PostItem[] = sorted.map((post) => {
-  const d = new Date(post.data.date);
-  return {
-    title: post.data.title,
-    slug: post.slug,
-    tags: post.data.tags,
-    description: post.data.description,
-    date: d.toISOString(),
-    year: d.getFullYear(),
-    monthDay: d.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' }),
-  };
-});
 ---
 
 <BaseLayout title="Search" description="Search and browse all articles">
@@ -89,9 +67,14 @@ const allPosts: PostItem[] = sorted.map((post) => {
 </BaseLayout>
 
 <script>
-  const posts: Array<{ title: string; slug: string; tags: string[]; description: string; date: string; year: number; monthDay: string }> = JSON.parse(`${
-    JSON.stringify(allPosts)
-  }`);
+  let posts: Array<{ title: string; slug: string; tags: string[]; description: string }> = [];
+
+  async function loadPosts() {
+    try {
+      const res = await fetch('/search.json');
+      if (res.ok) posts = await res.json();
+    } catch (_) {}
+  }
 
   const input = document.getElementById('archive-search') as HTMLInputElement;
   const list = document.getElementById('archive-list')!;
@@ -102,7 +85,6 @@ const allPosts: PostItem[] = sorted.map((post) => {
     const yearGroups = list.querySelectorAll<HTMLElement>('[data-year]');
 
     if (!q) {
-      // Show all
       articles.forEach((a) => (a.style.display = ''));
       yearGroups.forEach((g) => (g.style.display = ''));
       return;
@@ -129,4 +111,6 @@ const allPosts: PostItem[] = sorted.map((post) => {
       g.style.display = hasVisible ? '' : 'none';
     });
   });
+
+  loadPosts();
 </script>
