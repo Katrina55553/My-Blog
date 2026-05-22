@@ -50,6 +50,12 @@ pre.astro-code code span {
   font-family: inherit;
 }
 
+/* ===== Blockquote ===== */
+.prose blockquote::before,
+.prose blockquote::after {
+  display: none;
+}
+
 /* Scrollbar */
 pre.astro-code::-webkit-scrollbar {
   height: 6px;
