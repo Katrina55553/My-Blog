@@ -12,87 +12,81 @@ interface Props {
 
 const { headings, articleSlug } = Astro.props;
 const hasToc = headings.length > 0;
-const storageKey = articleSlug ? `toc-hidden-${articleSlug}` : 'toc-hidden';
+const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed';
 ---
 
 {hasToc && (
-  <>
-    <aside
-      id="toc-sidebar"
-      class="hidden xl:block w-64 shrink-0"
-    >
-      <div class="sticky top-20">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-semibold text-slate-300 uppercase tracking-wider">目录</span>
-          <button
-            id="toc-close-btn"
-            class="text-slate-500 hover:text-slate-300 transition-colors p-0.5 leading-none cursor-pointer"
-            aria-label="隐藏目录"
-            title="隐藏目录"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <nav class="relative">
-          <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-800"></div>
-          <ul class="space-y-1">
-            {headings.map((h) => (
-              <li>
-                <a
-                  href={`#${h.slug}`}
-                  class="toc-link block text-base leading-relaxed py-1 border-l-2 -ml-px border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors no-underline"
-                  style={`padding-left: ${(h.depth - 2) * 0.75 + 0.75}rem`}
-                >
-                  {h.text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+  <aside
+    id="toc-sidebar"
+    class="hidden xl:block w-64 shrink-0"
+  >
+    <div class="sticky top-20">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-sm font-semibold text-slate-300 uppercase tracking-wider">目录</span>
+        <button
+          id="toc-toggle-btn"
+          class="text-slate-500 hover:text-slate-300 transition-colors p-0.5 leading-none cursor-pointer"
+          aria-label="折叠目录"
+        >
+          <svg id="toc-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 15L12 9L18 15" />
+          </svg>
+        </button>
       </div>
-    </aside>
-
-    <button
-      id="toc-reopen-btn"
-      class="hidden fixed right-6 bottom-20 z-20 w-9 h-9 rounded-full bg-slate-800 border border-slate-700 text-slate-400 hover:text-cyan-400 hover:border-cyan-400 shadow-lg transition-all cursor-pointer"
-      aria-label="显示目录"
-      title="显示目录"
-    >
-      <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-      </svg>
-    </button>
-  </>
+      <nav id="toc-content" class="relative">
+        <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-800"></div>
+        <ul class="space-y-1">
+          {headings.map((h) => (
+            <li>
+              <a
+                href={`#${h.slug}`}
+                class="toc-link block text-base leading-relaxed py-1 border-l-2 -ml-px border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors no-underline"
+                style={`padding-left: ${(h.depth - 2) * 0.75 + 0.75}rem`}
+              >
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </aside>
 )}
 
 <script define:vars={{ storageKey }}>
   (function initToc() {
     const sidebar = document.getElementById('toc-sidebar');
-    const closeBtn = document.getElementById('toc-close-btn');
-    const reopenBtn = document.getElementById('toc-reopen-btn');
+    const toggleBtn = document.getElementById('toc-toggle-btn');
+    const content = document.getElementById('toc-content');
+    const chevron = document.getElementById('toc-chevron');
 
-    if (!sidebar || !closeBtn || !reopenBtn) return;
+    if (!sidebar || !toggleBtn || !content || !chevron) return;
 
-    function hideToc() {
-      sidebar.classList.add('!hidden');
-      reopenBtn.classList.remove('hidden');
+    function collapse() {
+      content.classList.add('hidden');
+      chevron.style.transform = 'rotate(180deg)';
       try { localStorage.setItem(storageKey, 'true'); } catch (_) { /* noop */ }
     }
 
-    function showToc() {
-      sidebar.classList.remove('!hidden');
-      reopenBtn.classList.add('hidden');
+    function expand() {
+      content.classList.remove('hidden');
+      chevron.style.transform = 'rotate(0deg)';
       try { localStorage.removeItem(storageKey); } catch (_) { /* noop */ }
     }
 
-    closeBtn.addEventListener('click', hideToc);
-    reopenBtn.addEventListener('click', showToc);
+    function toggle() {
+      if (content.classList.contains('hidden')) {
+        expand();
+      } else {
+        collapse();
+      }
+    }
+
+    toggleBtn.addEventListener('click', toggle);
 
     try {
       if (localStorage.getItem(storageKey) === 'true') {
-        hideToc();
+        collapse();
       }
     } catch (_) { /* noop */ }
 
