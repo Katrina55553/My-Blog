@@ -1,0 +1,98 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = await getCollection('posts');
+const postMap = Object.fromEntries(
+  posts.map((p) => [p.slug, { title: p.data.title, date: p.data.date, tags: p.data.tags, description: p.data.description }]),
+);
+const websiteId = '6c99da40-95d4-4832-8aeb-ba2c2e508a7d';
+---
+
+<BaseLayout title="Popular" description="Most viewed articles on Katrina's blog">
+  <section class="py-12">
+    <h1 class="text-4xl font-bold text-white mb-8">Popular</h1>
+    <div id="popular-list" class="space-y-4">
+      <p class="text-slate-500">Loading...</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ postMap, websiteId }}>
+  (() => {
+    const CACHE_KEY = '__vc_data';
+    const TTL = 30 * 60 * 1000;
+    const container = document.getElementById('popular-list');
+    const posts = JSON.parse(JSON.stringify(postMap));
+
+    function render(data) {
+      const list = Object.entries(posts)
+        .map(([slug, meta]) => {
+          const entry = data.find((item) => item.x === `/posts/${slug}`);
+          const views = entry && typeof entry.y === 'number' ? entry.y : 0;
+          return { slug, ...meta, views };
+        })
+        .sort((a, b) => b.views - a.views);
+
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-slate-500">No posts yet.</p>';
+        return;
+      }
+
+      const medal = (i) => {
+        if (i === 0) return '<span class="text-yellow-400 font-bold">1</span>';
+        if (i === 1) return '<span class="text-slate-300 font-bold">2</span>';
+        if (i === 2) return '<span class="text-amber-600 font-bold">3</span>';
+        return `<span class="text-slate-600">${i + 1}</span>`;
+      };
+
+      container.innerHTML = list
+        .map((post, i) => {
+          const date = new Date(post.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+          const tags = post.tags?.map((t) => `<span class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">${t}</span>`).join(' ') || '';
+          const viewsText = post.views > 0 ? `${post.views} views` : '&mdash;';
+
+          return `
+            <article class="flex items-center gap-4 border-b border-slate-800 pb-4">
+              <div class="text-lg w-8 shrink-0 text-center">${medal(i)}</div>
+              <div class="flex-1 min-w-0">
+                <a href="/posts/${post.slug}" class="text-white hover:text-cyan-400 transition-colors no-underline font-medium">${post.title}</a>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-slate-500">
+                  <time>${date}</time>
+                  ${tags}
+                </div>
+              </div>
+              <div class="text-sm text-slate-500 shrink-0">${viewsText}</div>
+            </article>`;
+        })
+        .join('');
+    }
+
+    function fetchAndCache() {
+      const now = Date.now();
+      return fetch(`/api/views/websites/${websiteId}/metrics?startAt=0&endAt=${now}&type=url`)
+        .then((r) => { if (!r.ok) throw new Error('bad status'); return r.json(); })
+        .then((data) => {
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now })); } catch (e) { /* quota */ }
+          return data;
+        });
+    }
+
+    function loadCache() {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const cached = JSON.parse(raw);
+        if (cached.data && cached.ts && (Date.now() - cached.ts) < TTL) return cached.data;
+      } catch (e) { /* ignore */ }
+      return null;
+    }
+
+    const cached = loadCache();
+    if (cached) { render(cached); return; }
+
+    fetchAndCache()
+      .then((data) => render(data))
+      .catch(() => { container.innerHTML = '<p class="text-slate-500">Failed to load view data.</p>'; });
+  })();
+</script>
