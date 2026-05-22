@@ -32,7 +32,7 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
       id="toc-sidebar"
       class="hidden xl:block w-64 shrink-0"
     >
-      <div class="sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto">
+      <div class="toc-scroll sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto">
         <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">目录</h3>
         <nav class="relative">
           <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-800"></div>
@@ -151,5 +151,12 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
   .toc-active {
     color: #22d3ee !important;
     border-color: #22d3ee !important;
+  }
+  .toc-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .toc-scroll::-webkit-scrollbar {
+    display: none;
   }
 </style>
