@@ -6,9 +6,10 @@ interface Props {
   title: string;
   description?: string;
   pageType?: 'website' | 'article';
+  wide?: boolean;
 }
 
-const { title, description, pageType = 'website' } = Astro.props;
+const { title, description, pageType = 'website', wide = false } = Astro.props;
 const fullTitle = `${title} | Katrina's blog`;
 ---
 
@@ -34,7 +35,7 @@ const fullTitle = `${title} | Katrina's blog`;
   </head>
   <body class="bg-slate-950 text-slate-200 font-serif min-h-screen flex flex-col">
     <header class="sticky top-0 z-10 bg-slate-950/80 backdrop-blur border-b border-slate-800">
-      <nav class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+      <nav class={`mx-auto px-4 h-14 flex items-center justify-between ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
         <a href="/" class="text-lg font-semibold text-white hover:text-cyan-400 transition-colors no-underline">
           Katrina's blog
         </a>
@@ -78,7 +79,7 @@ const fullTitle = `${title} | Katrina's blog`;
       </nav>
     </header>
 
-    <main class="flex-1 max-w-3xl mx-auto px-4 py-8 w-full">
+    <main class={`flex-1 mx-auto px-4 py-8 w-full ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
       <Search />
       <slot />
     </main>

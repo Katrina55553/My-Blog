@@ -3,6 +3,8 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PrevNext from '../../components/PrevNext.astro';
 import ViewCounter from '../../components/ViewCounter.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import type { TocHeading } from '../../components/TableOfContents.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -32,10 +34,47 @@ const formattedDate = date.toLocaleDateString('zh-CN', {
   month: 'long',
   day: 'numeric',
 });
+
+// 从 markdown body 中提取 h2/h3 标题，生成目录
+const GithubSlugger = (await import('github-slugger')).default;
+
+function extractHeadings(raw: string): TocHeading[] {
+  const slugger = new GithubSlugger();
+  const headings: TocHeading[] = [];
+  const lines = raw.split('\n');
+  let inCodeBlock = false;
+
+  for (const line of lines) {
+    if (/^```/.test(line)) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+
+    const match = line.match(/^(#{2,3})\s+(.+)$/);
+    if (!match) continue;
+
+    const text = match[2]
+      .replace(/`/g, '')
+      .replace(/\\([\\`*_{}[\]()#+\-.!])/g, '$1')
+      .trim();
+
+    const slug = slugger.slug(text);
+    if (slug) {
+      headings.push({ depth: match[1].length, text, slug });
+    }
+  }
+  return headings;
+}
+
+const tocHeadings = extractHeadings(current.body || '');
 ---
 
-<BaseLayout title={title} description={description} pageType="article">
-  <article class="py-8">
+<BaseLayout title={title} description={description} pageType="article" wide>
+  <div class="flex gap-6 xl:gap-8">
+    <!-- 主内容区 -->
+    <div class="min-w-0 flex-1">
+      <article class="py-8">
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Article',
@@ -80,6 +119,10 @@ const formattedDate = date.toLocaleDateString('zh-CN', {
 
     <PrevNext {prev} {next} />
   </article>
+    </div>
+
+    <TableOfContents headings={tocHeadings} articleSlug={current.slug} />
+  </div>
 
   <script>
     document.querySelectorAll('pre.astro-code').forEach((pre) => {

@@ -1,0 +1,134 @@
+---
+export interface TocHeading {
+  depth: number;
+  text: string;
+  slug: string;
+}
+
+interface Props {
+  headings: TocHeading[];
+  articleSlug?: string;
+}
+
+const { headings, articleSlug } = Astro.props;
+const hasToc = headings.length > 0;
+const storageKey = articleSlug ? `toc-hidden-${articleSlug}` : 'toc-hidden';
+---
+
+{hasToc && (
+  <>
+    <aside
+      id="toc-sidebar"
+      class="hidden xl:block w-64 shrink-0"
+    >
+      <div class="sticky top-20">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-semibold text-slate-300 uppercase tracking-wider">目录</span>
+          <button
+            id="toc-close-btn"
+            class="text-slate-500 hover:text-slate-300 transition-colors p-0.5 leading-none cursor-pointer"
+            aria-label="隐藏目录"
+            title="隐藏目录"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <nav class="relative">
+          <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-800"></div>
+          <ul class="space-y-1">
+            {headings.map((h) => (
+              <li>
+                <a
+                  href={`#${h.slug}`}
+                  class="toc-link block text-base leading-relaxed py-1 border-l-2 -ml-px border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors no-underline"
+                  style={`padding-left: ${(h.depth - 2) * 0.75 + 0.75}rem`}
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </aside>
+
+    <button
+      id="toc-reopen-btn"
+      class="hidden fixed right-6 bottom-20 z-20 w-9 h-9 rounded-full bg-slate-800 border border-slate-700 text-slate-400 hover:text-cyan-400 hover:border-cyan-400 shadow-lg transition-all cursor-pointer"
+      aria-label="显示目录"
+      title="显示目录"
+    >
+      <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+      </svg>
+    </button>
+  </>
+)}
+
+<script define:vars={{ storageKey }}>
+  (function initToc() {
+    const sidebar = document.getElementById('toc-sidebar');
+    const closeBtn = document.getElementById('toc-close-btn');
+    const reopenBtn = document.getElementById('toc-reopen-btn');
+
+    if (!sidebar || !closeBtn || !reopenBtn) return;
+
+    function hideToc() {
+      sidebar.classList.add('!hidden');
+      reopenBtn.classList.remove('hidden');
+      try { localStorage.setItem(storageKey, 'true'); } catch (_) { /* noop */ }
+    }
+
+    function showToc() {
+      sidebar.classList.remove('!hidden');
+      reopenBtn.classList.add('hidden');
+      try { localStorage.removeItem(storageKey); } catch (_) { /* noop */ }
+    }
+
+    closeBtn.addEventListener('click', hideToc);
+    reopenBtn.addEventListener('click', showToc);
+
+    try {
+      if (localStorage.getItem(storageKey) === 'true') {
+        hideToc();
+      }
+    } catch (_) { /* noop */ }
+
+    // ===== 滚动监听高亮 =====
+    const headings = [...document.querySelectorAll('h2[id], h3[id]')];
+    const links = document.querySelectorAll('.toc-link');
+
+    if (headings.length === 0 || links.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible.length > 0) {
+          const id = visible[0].target.id;
+          links.forEach((l) => {
+            if (l.getAttribute('href') === `#${id}`) {
+              l.classList.add('toc-active');
+            } else {
+              l.classList.remove('toc-active');
+            }
+          });
+        }
+      },
+      { rootMargin: '-100px 0px 0px 0px' }
+    );
+
+    headings.forEach((h) => observer.observe(h));
+  })();
+</script>
+
+<style is:global>
+  .toc-active {
+    color: #22d3ee !important;
+    border-color: #22d3ee !important;
+  }
+</style>
