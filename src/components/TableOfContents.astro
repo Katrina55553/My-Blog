@@ -16,73 +16,72 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
 ---
 
 {hasToc && (
-  <aside
-    id="toc-sidebar"
-    class="hidden xl:block w-64 shrink-0"
-  >
-    <div class="sticky top-20">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-sm font-semibold text-slate-300 uppercase tracking-wider">目录</span>
-        <button
-          id="toc-toggle-btn"
-          class="text-slate-500 hover:text-slate-300 transition-colors p-0.5 leading-none cursor-pointer"
-          aria-label="折叠目录"
-        >
-          <svg id="toc-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 6L15 12L9 18" />
-          </svg>
-        </button>
+  <>
+    <!-- 切换按钮 — 夹在正文和目录之间 -->
+    <button
+      id="toc-toggle-btn"
+      class="hidden xl:flex shrink-0 sticky top-20 w-7 h-10 items-center justify-center bg-slate-900/50 hover:bg-slate-800/80 border border-slate-800 rounded-md text-slate-500 hover:text-cyan-400 transition-colors cursor-pointer group"
+      aria-label="切换目录"
+    >
+      <svg id="toc-chevron" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 6L15 12L9 18" />
+      </svg>
+    </button>
+
+    <aside
+      id="toc-sidebar"
+      class="hidden xl:block w-64 shrink-0"
+    >
+      <div class="sticky top-20">
+        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">目录</h3>
+        <nav class="relative">
+          <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-800"></div>
+          <ul class="space-y-1">
+            {headings.map((h) => (
+              <li>
+                <a
+                  href={`#${h.slug}`}
+                  class="toc-link block text-base leading-relaxed py-1 border-l-2 -ml-px border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors no-underline"
+                  style={`padding-left: ${(h.depth - 2) * 0.75 + 0.75}rem`}
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
-      <nav id="toc-content" class="relative">
-        <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-800"></div>
-        <ul class="space-y-1">
-          {headings.map((h) => (
-            <li>
-              <a
-                href={`#${h.slug}`}
-                class="toc-link block text-base leading-relaxed py-1 border-l-2 -ml-px border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors no-underline"
-                style={`padding-left: ${(h.depth - 2) * 0.75 + 0.75}rem`}
-              >
-                {h.text}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </div>
-  </aside>
+    </aside>
+  </>
 )}
 
 <script define:vars={{ storageKey }}>
   (function initToc() {
     const sidebar = document.getElementById('toc-sidebar');
     const toggleBtn = document.getElementById('toc-toggle-btn');
-    const content = document.getElementById('toc-content');
     const chevron = document.getElementById('toc-chevron');
 
-    if (!sidebar || !toggleBtn || !content || !chevron) return;
+    if (!sidebar || !toggleBtn || !chevron) return;
 
     function collapse() {
-      content.classList.add('hidden');
+      sidebar.classList.add('!hidden');
       chevron.style.transform = 'rotate(180deg)';
       try { localStorage.setItem(storageKey, 'true'); } catch (_) { /* noop */ }
     }
 
     function expand() {
-      content.classList.remove('hidden');
+      sidebar.classList.remove('!hidden');
       chevron.style.transform = 'rotate(0deg)';
       try { localStorage.removeItem(storageKey); } catch (_) { /* noop */ }
     }
 
-    function toggle() {
-      if (content.classList.contains('hidden')) {
+    toggleBtn.addEventListener('click', () => {
+      if (sidebar.classList.contains('!hidden')) {
         expand();
       } else {
         collapse();
       }
-    }
-
-    toggleBtn.addEventListener('click', toggle);
+    });
 
     try {
       if (localStorage.getItem(storageKey) === 'true') {
