@@ -1,5 +1,5 @@
 ---
-title: 前缀和优化 DP
+title: Aleppo Collegiate Programming Contest A 题 题解
 date: 2026-03-28
 tags: [Codeforces, 题解]
 description: 双指针 + 前缀和优化 DP，解决将数组划分为合法凸多边形边的计数问题，复杂度 O(n)。
