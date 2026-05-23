@@ -1,5 +1,5 @@
 ---
-title: 2024 CCPC 哈尔滨 B 题 Concave Hull 题解
+title: 2024 CCPC 哈尔滨 B 题 题解
 date: 2026-04-19
 tags: [ACM, 题解]
 description: 2024 CCPC 哈尔滨 B 题 解题思路，使用旋转卡壳求凹包，枚举外凸包边并维护内凸包最近点。
