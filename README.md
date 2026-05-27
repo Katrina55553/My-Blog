@@ -1,5 +1,8 @@
 # Katrina's Blog
 
+[![GitHub](https://img.shields.io/badge/GitHub-Katrina55553/My--Blog-181717?logo=github)](https://github.com/Katrina55553/My-Blog)
+[![Blog](https://img.shields.io/badge/Blog-121.43.63.231-00adb5?logo=google-chrome)](http://121.43.63.231)
+
 基于 [Astro](https://astro.build) 的个人博客，使用 TypeScript + Tailwind CSS v4。
 
 ## 技术栈
