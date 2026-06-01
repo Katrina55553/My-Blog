@@ -1,7 +1,7 @@
 ---
 title: 2026 CCPC 福建 I 题 题解
-date: 2026-05-31
-tags: [ACM, 题解, CCPC, 动态规划, 字符串, 贪心]
+date: 2026-06-01
+tags: [ACM, 题解]
 description: 2026 CCPC 福建 I 题，DP 预处理 + 字典序贪心构造最长合法车牌。
 ---
 
