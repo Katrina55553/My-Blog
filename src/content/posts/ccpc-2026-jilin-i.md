@@ -81,5 +81,4 @@ T = 1
 T = int(input())
 for _ in range(T):
     solve()
-
 ```
