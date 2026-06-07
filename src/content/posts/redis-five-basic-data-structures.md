@@ -1,7 +1,7 @@
 ---
 title: Redis 五种基本数据结构
 date: 2026-05-28
-tags: [Redis, 中间件]
+tags: [后端, Redis, 中间件]
 description: Redis 五种基本数据结构（字符串、链表、哈希表、集合、有序集合）的底层实现详解，涵盖 SDS、渐进式 rehash、intset、跳跃表等核心机制。
 ---
 

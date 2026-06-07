@@ -1,7 +1,7 @@
 ---
 title: Redis 八股文 —— 缓存
 date: 2026-05-31
-tags: [Redis, 中间件]
+tags: [后端, Redis, 中间件]
 description: Redis 缓存相关八股文，涵盖内存淘汰、过期删除、缓存一致性、缓存穿透/击穿/雪崩等问题与解决方案。
 ---
 
