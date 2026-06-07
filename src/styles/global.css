@@ -78,3 +78,19 @@ pre.astro-code::-webkit-scrollbar-thumb {
   color: #7dcfff;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+/* ===== Mermaid ===== */
+pre.mermaid {
+  background: linear-gradient(135deg, #1b1c2b 0%, #181825 40%, #11111b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+pre.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}

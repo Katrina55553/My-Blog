@@ -125,7 +125,7 @@ const tocHeadings = extractHeadings(current.body || '');
   </div>
 
   <script>
-    document.querySelectorAll('pre.astro-code').forEach((pre) => {
+    document.querySelectorAll('pre.astro-code:not(.mermaid)').forEach((pre) => {
       const wrapper = document.createElement('div');
       wrapper.className = 'relative group';
       pre.parentNode!.insertBefore(wrapper, pre);
@@ -156,5 +156,19 @@ const tocHeadings = extractHeadings(current.body || '');
       };
       wrapper.appendChild(btn);
     });
+  </script>
+
+  <script>
+    // 加载并初始化 Mermaid 图表渲染
+    const mermaidElements = document.querySelectorAll('.mermaid');
+    if (mermaidElements.length > 0) {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js';
+      script.onload = () => {
+        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+        mermaid.run({ querySelector: '.mermaid' });
+      };
+      document.head.appendChild(script);
+    }
   </script>
 </BaseLayout>
