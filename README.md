@@ -11,7 +11,6 @@
 - **样式**: Tailwind CSS v4 + @tailwindcss/typography
 - **内容**: Markdown + Content Collections + LaTeX (KaTeX)
 - **语法高亮**: Shiki (github-dark) + 代码复制
-- **图表**: Mermaid（客户端渲染）
 - **搜索**: 客户端实时搜索
 - **统计**: Umami Analytics
 - **部署**: Docker + Nginx + GitHub Actions
@@ -74,18 +73,15 @@ description: 文章摘要
 ## Docker 部署
 
 ```bash
-# 创建 .env 文件设置 Umami API Key
-echo "UMAMI_API_KEY=your_api_key" > .env
 docker compose up -d --build    # http://localhost
 ```
 
-`.env` 已加入 `.gitignore`，不会提交到仓库。GitHub Actions 通过 Secret `UMAMI_API_KEY` 传入。
+GitHub Actions 在 push main 时自动部署到服务器。
 
 ## 特性
 
 - 暗色主题，响应式设计
 - Shiki 代码高亮 + 一键复制
-- Mermaid 图表渲染
 - LaTeX 数学公式（KaTeX）
 - 客户端搜索
 - 标签系统 + 归档 + 分页
