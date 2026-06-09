@@ -17,19 +17,24 @@ export default defineConfig({
       rehypeSlug,
       // 将 Shiki 处理后的 mermaid 代码块替换为 <pre class="mermaid">
       () => (tree) => {
-        (function walk(node) {
-          if (!node.children) return;
+        /**
+         * @param {import('hast').Element | import('hast').Root} node
+         */
+        function walk(node) {
+          if (!('children' in node)) return;
           for (let i = 0; i < node.children.length; i++) {
             const child = node.children[i];
             if (child.type === 'element' && child.tagName === 'pre') {
               const props = child.properties || {};
               const lang = props.dataLanguage || props['data-language'] || '';
               if (lang === 'mermaid') {
-                const text = (function getText(n) {
+                /** @type {(n: import('hast').Element | import('hast').Text) => string} */
+                const getText = (n) => {
                   if (n.type === 'text') return n.value;
-                  if (n.children) return n.children.map(getText).join('');
+                  if ('children' in n) return n.children.map(c => getText(/** @type {import('hast').Element | import('hast').Text} */ (c))).join('');
                   return '';
-                })(child);
+                };
+                const text = getText(child);
                 node.children[i] = {
                   type: 'element',
                   tagName: 'pre',
@@ -38,9 +43,12 @@ export default defineConfig({
                 };
               }
             }
-            walk(node.children[i]);
+            if ('children' in node.children[i]) {
+              walk(/** @type {import('hast').Element} */ (node.children[i]));
+            }
           }
-        })(tree);
+        }
+        walk(/** @type {import('hast').Root} */ (tree));
       },
     ],
     shikiConfig: {
