@@ -4,3 +4,5 @@ services:
     ports:
       - "80:80"
     restart: unless-stopped
+    environment:
+      - UMAMI_API_KEY=${UMAMI_API_KEY}

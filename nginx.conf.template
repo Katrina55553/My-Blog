@@ -27,14 +27,14 @@ server {
         add_header Cache-Control "public";
     }
 
-    # Umami API proxy — inject API key server-side
+    # Umami API proxy — API key injected via environment variable at container startup
     location /api/views/ {
         resolver 1.1.1.1 valid=300s;
         resolver_timeout 5s;
         set $umami_host api.umami.is;
         proxy_pass https://$umami_host/v1/;
         proxy_ssl_server_name on;
-        proxy_set_header x-umami-api-key "api_m3AASQAcaRj3ca3M9p6x1z6orcoeapNv";
+        proxy_set_header x-umami-api-key "${UMAMI_API_KEY}";
         proxy_set_header Host $umami_host;
     }
 
