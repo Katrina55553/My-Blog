@@ -1,8 +1,5 @@
 services:
   blog:
     build: .
-    ports:
-      - "80:80"
+    network_mode: "host"
     restart: unless-stopped
-    environment:
-      - UMAMI_API_KEY=${UMAMI_API_KEY}

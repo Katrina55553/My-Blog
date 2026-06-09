@@ -6,7 +6,7 @@ const posts = await getCollection('posts');
 const postMap = Object.fromEntries(
   posts.map((p) => [p.slug, { title: p.data.title, date: p.data.date, tags: p.data.tags, description: p.data.description }]),
 );
-const websiteId = '6c99da40-95d4-4832-8aeb-ba2c2e508a7d';
+const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 ---
 
 <BaseLayout title="Popular" description="Most viewed articles on Katrina's blog">
