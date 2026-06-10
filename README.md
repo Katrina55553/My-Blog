@@ -13,7 +13,7 @@
 - **语法高亮**: Shiki (github-dark) + 代码复制
 - **图表**: Mermaid（客户端渲染）
 - **搜索**: 客户端实时搜索
-- **统计**: Umami Analytics
+- **统计**: Umami Analytics (自托管)
 - **部署**: Docker + Nginx + GitHub Actions
 
 ## 项目结构
@@ -74,12 +74,10 @@ description: 文章摘要
 ## Docker 部署
 
 ```bash
-# 创建 .env 文件设置 Umami API Key
-echo "UMAMI_API_KEY=your_api_key" > .env
 docker compose up -d --build    # http://localhost
 ```
 
-`.env` 已加入 `.gitignore`，不会提交到仓库。GitHub Actions 通过 Secret `UMAMI_API_KEY` 传入。
+Umami 自托管于同一 VPS（端口 3001），通过 nginx 代理 `/api/views/` 和 `/umami/`。GitHub Actions 在 push main 时自动部署。
 
 ## 特性
 
