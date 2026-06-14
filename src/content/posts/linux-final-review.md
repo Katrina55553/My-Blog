@@ -1,7 +1,8 @@
 ---
 title: Linux 期末复习
 date: 2026-06-14
-tags: Linux
+tags:
+  - Linux
 description: Linux 期末复习笔记，涵盖常用命令、权限管理、用户管理、Vim、进程管理、网络、Shell 编程等核心知识点。
 ---
 
