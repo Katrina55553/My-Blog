@@ -8,7 +8,7 @@ import rehypeSlug from 'rehype-slug';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'http://121.43.63.231',
+  site: 'https://blog.cogod.cn',
   integrations: [sitemap()],
   markdown: {
     remarkPlugins: [remarkMath],
