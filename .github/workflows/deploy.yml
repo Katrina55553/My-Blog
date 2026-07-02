@@ -12,7 +12,7 @@ jobs:
         run: |
           sudo apt-get install -y sshpass
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            cd ~/my-blog
+            cd ~/My-Blog
             git fetch origin
             git reset --hard origin/main
             docker compose down
