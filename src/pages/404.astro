@@ -3,14 +3,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Page Not Found" description="The page you're looking for doesn't exist">
-  <section class="py-20 text-center">
-    <h1 class="text-6xl font-bold text-slate-600 mb-4">404</h1>
-    <p class="text-xl text-slate-400 mb-8">Page not found</p>
+  <section class="reveal py-20 md:py-28 text-center">
+    <p class="label-caps text-vermilion mb-6">§ Erratum</p>
+    <h1 class="font-display font-semibold text-ink tracking-tight text-8xl md:text-9xl leading-none mb-2">
+      4<span class="italic text-vermilion">0</span>4
+    </h1>
+    <p class="font-newsreader text-xl md:text-2xl text-ink-2 italic mb-2">
+      This leaf is missing from the journal.
+    </p>
+    <p class="font-newsreader text-ink-3 mb-10">
+      The page you seek was never bound, or has since been removed.
+    </p>
     <a
       href="/"
-      class="inline-block bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-6 py-2 rounded-lg transition-colors no-underline"
+      class="group inline-flex items-center gap-3 border border-vermilion text-vermilion hover:bg-vermilion hover:text-paper px-6 py-2.5 no-underline transition-colors"
     >
-      Back to Home
+      <span class="label-caps">Return to the Masthead</span>
+      <span class="transition-transform group-hover:translate-x-1">→</span>
     </a>
   </section>
 </BaseLayout>

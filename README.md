@@ -25,18 +25,20 @@ src/
 │   ├── Image.astro             # 图片优化
 │   ├── Pagination.astro        # 分页导航
 │   ├── PrevNext.astro          # 上一篇/下一篇
-│   └── Search.astro            # 搜索栏
-├── layouts/BaseLayout.astro    # 全局布局
+│   ├── TableOfContents.astro   # 文章目录（侧栏，滚动高亮）
+│   └── ViewCounter.astro       # 访问量统计
+├── layouts/BaseLayout.astro    # 全局布局（含暗黑模式切换）
 ├── pages/
 │   ├── index.astro             # 首页（分页，5 篇/页）
 │   ├── page/[page].astro       # 分页页
 │   ├── posts/[…slug].astro     # 文章详情
 │   ├── tags/index.astro        # 标签总览
 │   ├── tags/[tag].astro        # 标签筛选
-│   ├── archive.astro           # 归档
-│   ├── about.astro             # 关于
+│   ├── popular.astro           # 热门文章（按访问量排序）
+│   ├── search.astro            # 搜索页（按年份归档 + 实时筛选）
+│   ├── search.json.ts          # 搜索索引（构建时生成）
 │   └── 404.astro               # 404
-└── styles/global.css           # Tailwind + KaTeX
+└── styles/global.css           # 设计系统（Ink & Vellum / Ink & Midnight 双主题令牌）
 ```
 
 ## 本地开发
@@ -81,13 +83,16 @@ Umami 自托管于同一 VPS（端口 3001），通过 nginx 代理 `/api/views/
 
 ## 特性
 
-- 暗色主题，响应式设计
-- Shiki 代码高亮 + 一键复制
+- **Ink & Vellum / Ink & Midnight 双主题**：编辑风设计系统，暖羊皮纸亮色 + 暖午夜暗色，一键切换并跟随系统偏好
+- Fraunces + Newsreader 衬线字体排版，首字下沉、编辑式章节标号、朱砂印章红点缀
+- 暗黑模式切换（localStorage 持久化、跨标签页同步、防 FOUC）
+- Shiki 代码高亮 + 一键复制（终端式暗色代码块，双主题下保持编辑对比）
 - Mermaid 图表渲染
 - LaTeX 数学公式（KaTeX）
-- 客户端搜索
-- 标签系统 + 归档 + 分页
-- 阅读时间 + 上一篇/下一篇导航
+- 客户端实时搜索 + 按年份归档
+- 标签系统 + 热门排行（按访问量）+ 分页
+- 文章目录侧栏（滚动高亮）+ 阅读时间 + 上一篇/下一篇导航
+- 访问量统计（Umami，含本地缓存）
 - SEO（Open Graph / Twitter Card / JSON-LD / Sitemap / og:image）
-- Umami 访问统计
 - 纯 CSS 移动端汉堡菜单
+- 页脚备案信息（浙ICP备2026045444号）

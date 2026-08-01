@@ -74,7 +74,7 @@ const tocHeadings = extractHeadings(current.body || '');
   <div class="flex justify-center gap-3">
     <!-- 主内容区 -->
     <div class="min-w-0 flex-1 max-w-3xl">
-      <article class="py-8">
+      <article class="reveal">
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Article',
@@ -86,33 +86,42 @@ const tocHeadings = extractHeadings(current.body || '');
         name: 'Katrina',
       },
     })} />
-    <header class="mb-8">
-      <h1 class="text-3xl font-bold text-white mb-3">{title}</h1>
-      <div class="text-sm text-slate-500 mb-3 flex items-center gap-2">
-        <time>{formattedDate}</time>
-        <span>·</span>
-        <span>{minutes} min read</span>
-        <span>·</span>
+
+    <!-- Article kicker -->
+    <p class="label-caps text-vermilion mb-4 flex items-center gap-2">
+      <span>§</span> Essay
+    </p>
+
+    <header class="mb-10">
+      <h1 class="font-display font-semibold text-ink tracking-tight text-3xl md:text-5xl leading-[1.1] mb-5">{title}</h1>
+      <p class="font-newsreader text-lg text-ink-3 italic leading-relaxed mb-5">{description}</p>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-2 pb-4 border-b border-rule">
+        <span class="label-caps text-ink-2">Katrina</span>
+        <span class="text-rule-2">·</span>
+        <time class="label-caps text-ink-3">{formattedDate}</time>
+        <span class="text-rule-2">·</span>
+        <span class="label-caps text-ink-3">{minutes} min read</span>
+        <span class="text-rule-2">·</span>
         <ViewCounter slug={current.slug} />
       </div>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-x-4 gap-y-1 mt-4">
         {tags.map((tag: string) => (
           <a
             href={`/tags/${tag}`}
-            class="text-sm text-cyan-400 hover:text-cyan-300 no-underline"
+            class="font-mono text-xs text-ink-3 hover:text-vermilion no-underline transition-colors"
           >
-            #{tag}
+            <span class="text-vermilion">#</span>{tag}
           </a>
         ))}
       </div>
     </header>
 
-    <div class="prose prose-invert prose-slate max-w-none
-      prose-headings:text-white prose-headings:font-serif
-      prose-p:text-slate-300 prose-p:leading-relaxed
-      prose-a:text-cyan-400 prose-a:no-underline hover:prose-a:text-cyan-300
+    <div class="prose lead-drop max-w-none
+      prose-headings:font-display prose-headings:text-ink
+      prose-p:text-ink-2
+      prose-strong:text-ink
       prose-code:before:content-none prose-code:after:content-none
-      prose-img:rounded-lg
+      prose-img:rounded
     ">
       <Content />
     </div>

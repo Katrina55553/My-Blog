@@ -14,27 +14,31 @@ function pageUrl(p: number) {
 ---
 
 {total > 1 && (
-  <nav class="flex items-center justify-center gap-2 pt-8">
+  <nav class="flex items-center justify-center gap-1 pt-14">
     {current > 1 && (
-      <a href={pageUrl(current - 1)} class="px-3 py-1.5 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded transition-colors no-underline">
-        ← Prev
+      <a href={pageUrl(current - 1)} class="group flex items-center gap-2 px-4 py-2 no-underline transition-colors">
+        <span class="text-vermilion transition-transform group-hover:-translate-x-1">←</span>
+        <span class="label-caps text-ink-3 group-hover:text-vermilion transition-colors">Prev</span>
       </a>
     )}
+    <span class="mx-2 h-5 w-px bg-rule"></span>
     {Array.from({ length: total }, (_, i) => i + 1).map((p) => (
       <a
         href={pageUrl(p)}
-        class={`px-3 py-1.5 text-sm rounded transition-colors no-underline ${
+        class={`font-mono text-sm w-9 h-9 flex items-center justify-center no-underline transition-colors ${
           p === current
-            ? 'bg-cyan-500 text-slate-950 font-medium'
-            : 'text-slate-300 hover:text-cyan-400 hover:bg-slate-800'
+            ? 'bg-vermilion text-paper font-semibold'
+            : 'text-ink-3 hover:text-vermilion hover:bg-paper-2'
         }`}
       >
         {p}
       </a>
     ))}
+    <span class="mx-2 h-5 w-px bg-rule"></span>
     {current < total && (
-      <a href={pageUrl(current + 1)} class="px-3 py-1.5 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded transition-colors no-underline">
-        Next →
+      <a href={pageUrl(current + 1)} class="group flex items-center gap-2 px-4 py-2 no-underline transition-colors">
+        <span class="label-caps text-ink-3 group-hover:text-vermilion transition-colors">Next</span>
+        <span class="text-vermilion transition-transform group-hover:translate-x-1">→</span>
       </a>
     )}
   </nav>

@@ -18,6 +18,12 @@ const fullTitle = `${title} | Katrina's blog`;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script defer src="/umami/script.js" data-website-id="ceead9d3-35d9-4590-8678-d153328378a6"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <title>{fullTitle}</title>
     <meta name="description" content={description || "Katrina's personal blog"} />
     <meta property="og:title" content={fullTitle} />
@@ -31,75 +37,192 @@ const fullTitle = `${title} | Katrina's blog`;
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:image" content={new URL('/og-image.svg', Astro.url).href} />
     <link rel="canonical" href={Astro.url} />
+    <script is:inline>
+      // Set theme before paint to avoid FOUC. Reads saved pref, else OS preference.
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = saved || (prefersDark ? 'dark' : 'light');
+          if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        } catch (e) { /* localStorage blocked */ }
+      })();
+    </script>
   </head>
-  <body class="bg-slate-950 text-slate-200 font-serif min-h-screen flex flex-col">
-    <header class="sticky top-0 z-10 bg-slate-950/80 backdrop-blur border-b border-slate-800">
-      <nav class={`mx-auto px-4 h-14 flex items-center justify-between ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
-        <a href="/" class="text-lg font-semibold text-white hover:text-cyan-400 transition-colors no-underline">
-          Katrina's blog
+  <body class="text-ink-2 font-serif min-h-screen flex flex-col">
+    <header class="sticky top-0 z-20 bg-paper/85 backdrop-blur-md border-b border-rule">
+      <nav class={`mx-auto px-5 md:px-8 h-16 flex items-center justify-between ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
+        <a href="/" class="group flex items-center gap-3 no-underline">
+          <!-- vermilion seal mark -->
+          <span class="relative inline-flex items-center justify-center w-8 h-8 rounded-sm bg-vermilion text-paper font-display font-semibold text-lg shadow-[0_2px_0_rgba(154,53,34,1)] transition-transform group-hover:-rotate-6">
+            K
+            <span class="absolute inset-0 rounded-sm ring-1 ring-inset ring-paper/30"></span>
+          </span>
+          <span class="font-display text-lg font-semibold text-ink tracking-tight">
+            Katrina<span class="text-vermilion">’</span>s<span class="ml-2 text-ink-3 font-newsreader font-normal italic text-sm hidden sm:inline">journal</span>
+          </span>
         </a>
 
         <!-- Desktop nav -->
-        <div class="hidden md:flex gap-4 text-sm shrink-0">
-          <a href="/" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline p-1" title="Home" aria-label="Home">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
+        <div class="hidden md:flex items-center gap-1 shrink-0">
+          {[
+            { href: '/', label: 'Home', title: 'Home',
+              icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />' },
+            { href: '/popular', label: 'Popular', title: 'Popular',
+              icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />' },
+            { href: '/search', label: 'Search', title: 'Search',
+              icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />' },
+            { href: '/tags', label: 'Tags', title: 'Tags',
+              icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />' },
+          ].map((item) => (
+            <a
+              href={item.href}
+              title={item.title}
+              aria-label={item.title}
+              class="group relative flex items-center gap-2 px-3 py-1.5 no-underline transition-colors"
+            >
+              <svg class="w-4 h-4 text-ink-3 group-hover:text-vermilion transition-colors" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" set:html={item.icon} />
+              <span class="label-caps text-ink-3 group-hover:text-ink transition-colors">{item.label}</span>
+            </a>
+          ))}
+          <span class="mx-1 h-4 w-px bg-rule"></span>
+          <button
+            id="theme-toggle"
+            type="button"
+            aria-label="切换暗黑模式"
+            title="切换暗黑模式"
+            class="group relative p-1.5 no-underline transition-colors cursor-pointer"
+          >
+            <!-- sun (light mode) -->
+            <svg class="theme-sun w-4 h-4 text-ink-3 group-hover:text-vermilion transition-all duration-300 ease-out" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="4" />
+              <path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
             </svg>
-          </a>
-          <a href="/popular" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline p-1" title="Popular" aria-label="Popular">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+            <!-- moon (dark mode) -->
+            <svg class="theme-moon w-4 h-4 text-ink-3 group-hover:text-vermilion transition-all duration-300 ease-out" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
             </svg>
-          </a>
-          <a href="/search" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline p-1" title="Search" aria-label="Search">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </a>
-          <a href="/tags" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline p-1" title="Tags" aria-label="Tags">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-          </a>
-          <a href="https://github.com/Katrina55553/My-Blog" target="_blank" rel="noopener noreferrer" class="text-slate-300 hover:text-cyan-400 transition-colors no-underline p-1" aria-label="GitHub" title="GitHub">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          </button>
+          <a href="https://github.com/Katrina55553/My-Blog" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"
+             class="group p-1.5 no-underline transition-colors">
+            <svg class="w-4 h-4 text-ink-3 group-hover:text-vermilion transition-colors" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
             </svg>
           </a>
         </div>
 
         <!-- Mobile hamburger -->
-        <div class="md:hidden flex items-center ml-auto">
+        <div class="md:hidden flex items-center gap-1 ml-auto">
+          <button
+            id="theme-toggle-mobile"
+            type="button"
+            aria-label="切换暗黑模式"
+            title="切换暗黑模式"
+            class="group relative p-2 no-underline transition-colors cursor-pointer"
+          >
+            <svg class="theme-sun w-5 h-5 text-ink-3 group-hover:text-vermilion transition-all duration-300 ease-out" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="4" />
+              <path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+            <svg class="theme-moon w-5 h-5 text-ink-3 group-hover:text-vermilion transition-all duration-300 ease-out" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+            </svg>
+          </button>
           <input type="checkbox" id="menu-toggle" class="peer sr-only" />
           <label for="menu-toggle" class="cursor-pointer p-2 block peer-checked:hidden" aria-label="Open menu">
-            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            <svg class="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </label>
           <label for="menu-toggle" class="cursor-pointer p-2 hidden peer-checked:block" aria-label="Close menu">
-            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <svg class="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </label>
-          <div class="hidden peer-checked:block absolute top-14 right-0 left-0 bg-slate-900 border-b border-slate-800 shadow-lg">
-            <a href="/" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">Home</a>
-            <a href="/popular" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">Popular</a>
-            <a href="/search" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">Search</a>
-            <a href="/tags" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">Tags</a>
-            <a href="https://github.com/Katrina55553/My-Blog" target="_blank" rel="noopener noreferrer" class="block px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 no-underline">GitHub</a>
+          <div class="hidden peer-checked:block absolute top-16 right-0 left-0 bg-paper border-b border-rule shadow-[0_8px_30px_rgba(28,24,20,0.12)]">
+            {[
+              { href: '/', label: 'Home' },
+              { href: '/popular', label: 'Popular' },
+              { href: '/search', label: 'Search' },
+              { href: '/tags', label: 'Tags' },
+            ].map((item) => (
+              <a href={item.href} class="block px-5 py-3 label-caps text-ink-3 hover:bg-paper-2 hover:text-vermilion no-underline transition-colors border-b border-rule/60">
+                {item.label}
+              </a>
+            ))}
+            <a href="https://github.com/Katrina55553/My-Blog" target="_blank" rel="noopener noreferrer" class="block px-5 py-3 label-caps text-ink-3 hover:bg-paper-2 hover:text-vermilion no-underline transition-colors">
+              GitHub ↗
+            </a>
           </div>
         </div>
       </nav>
     </header>
 
-    <main class={`flex-1 mx-auto px-4 py-8 w-full ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
+    <main class={`flex-1 mx-auto px-5 md:px-8 py-10 md:py-14 w-full ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
       <slot />
     </main>
 
-    <footer class="border-t border-slate-800 py-6 text-center text-sm text-slate-500">
-      &copy; {new Date().getFullYear()} Katrina's blog
+    <footer class="border-t border-rule">
+      <div class={`mx-auto px-5 md:px-8 py-8 ${wide ? 'max-w-6xl' : 'max-w-3xl'} flex flex-col items-center gap-3`}>
+        <div class="flex items-center gap-3 text-ink-4">
+          <span class="h-px w-12 bg-rule-2"></span>
+          <span class="font-display text-sm italic">❦</span>
+          <span class="h-px w-12 bg-rule-2"></span>
+        </div>
+        <p class="label-caps text-ink-4">
+          &copy; {new Date().getFullYear()} · Katrina’s Journal
+        </p>
+        <p class="font-newsreader text-xs text-ink-4 italic">
+          Set in Fraunces &amp; Newsreader · Printed on vellum
+        </p>
+        <p class="font-mono text-xs text-ink-4">
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-vermilion transition-colors no-underline">
+            浙ICP备2026045444号
+          </a>
+        </p>
+      </div>
     </footer>
+
+    <script is:inline>
+      // Theme toggle — flips data-theme, persists to localStorage,
+      // and briefly enables a transition class for a smooth swap.
+      (function () {
+        var toggles = document.querySelectorAll('#theme-toggle, #theme-toggle-mobile');
+        if (!toggles.length) return;
+
+        function enableTransition() {
+          document.documentElement.classList.add('theme-transition');
+          window.setTimeout(function () {
+            document.documentElement.classList.remove('theme-transition');
+          }, 500);
+        }
+
+        toggles.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            enableTransition();
+            if (isDark) {
+              document.documentElement.removeAttribute('data-theme');
+              try { localStorage.setItem('theme', 'light'); } catch (e) {}
+            } else {
+              document.documentElement.setAttribute('data-theme', 'dark');
+              try { localStorage.setItem('theme', 'dark'); } catch (e) {}
+            }
+          });
+        });
+
+        // Sync across tabs / windows
+        window.addEventListener('storage', function (e) {
+          if (e.key !== 'theme') return;
+          enableTransition();
+          if (e.newValue === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+          }
+        });
+      })();
+    </script>
 
   </body>
 </html>

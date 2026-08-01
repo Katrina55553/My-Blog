@@ -20,11 +20,11 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
     <!-- 切换按钮 — 夹在正文和目录之间 -->
     <button
       id="toc-toggle-btn"
-      class="hidden xl:flex shrink-0 sticky top-20 w-7 h-10 items-center justify-center bg-slate-900/50 hover:bg-slate-800/80 border border-slate-800 rounded-md text-slate-500 hover:text-cyan-400 transition-colors cursor-pointer group"
+      class="hidden xl:flex shrink-0 sticky top-20 w-7 h-10 items-center justify-center bg-paper-2/60 hover:bg-paper-3 border border-rule rounded-sm text-ink-4 hover:text-vermilion transition-colors cursor-pointer group"
       aria-label="切换目录"
     >
       <svg id="toc-chevron" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 6L15 12L9 18" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 6L15 12L9 18" />
       </svg>
     </button>
 
@@ -33,15 +33,17 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
       class="hidden xl:block w-64 shrink-0"
     >
       <div class="toc-scroll sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto">
-        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">目录</h3>
+        <h3 class="label-caps text-ink-2 mb-4 flex items-center gap-2">
+          <span class="text-vermilion">§</span> Contents
+        </h3>
         <nav class="relative">
-          <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-800"></div>
+          <div class="absolute left-0 top-0 bottom-0 w-px bg-rule"></div>
           <ul class="space-y-1">
             {headings.map((h) => (
               <li>
                 <a
                   href={`#${h.slug}`}
-                  class="toc-link block text-base leading-relaxed py-1 border-l-2 -ml-px border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors no-underline"
+                  class="toc-link block font-newsreader text-base leading-relaxed py-1.5 border-l-2 -ml-px border-transparent text-ink-3 hover:text-ink hover:border-rule-2 transition-colors no-underline"
                   style={`padding-left: ${(h.depth - 2) * 0.75 + 0.75}rem`}
                 >
                   {h.text}
@@ -149,8 +151,9 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
 
 <style is:global>
   .toc-active {
-    color: #22d3ee !important;
-    border-color: #22d3ee !important;
+    color: #b8412c !important;
+    border-color: #b8412c !important;
+    font-weight: 500;
   }
   .toc-scroll {
     scrollbar-width: none;

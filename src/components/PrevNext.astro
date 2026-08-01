@@ -9,19 +9,23 @@ interface Props {
 const { prev, next } = Astro.props;
 ---
 
-<nav class="mt-12 pt-6 border-t border-slate-800 grid grid-cols-2 gap-4">
+<nav class="mt-16 pt-8 border-t border-rule grid grid-cols-2 gap-6">
   {prev ? (
-    <a href={`/posts/${prev.slug}`} class="text-left no-underline group">
-      <span class="text-xs text-slate-500 block mb-1">← Previous</span>
-      <span class="text-sm text-slate-300 group-hover:text-cyan-400 transition-colors">{prev.data.title}</span>
+    <a href={`/posts/${prev.slug}`} class="text-left no-underline group block">
+      <span class="label-caps text-ink-4 block mb-2 flex items-center gap-1.5">
+        <span class="text-vermilion transition-transform group-hover:-translate-x-1">←</span> Previous
+      </span>
+      <span class="font-display font-semibold text-ink text-lg leading-snug group-hover:text-vermilion transition-colors">{prev.data.title}</span>
     </a>
   ) : (
     <div />
   )}
   {next ? (
-    <a href={`/posts/${next.slug}`} class="text-right no-underline group">
-      <span class="text-xs text-slate-500 block mb-1">Next →</span>
-      <span class="text-sm text-slate-300 group-hover:text-cyan-400 transition-colors">{next.data.title}</span>
+    <a href={`/posts/${next.slug}`} class="text-right no-underline group block">
+      <span class="label-caps text-ink-4 block mb-2 flex items-center justify-end gap-1.5">
+        Next <span class="text-vermilion transition-transform group-hover:translate-x-1">→</span>
+      </span>
+      <span class="font-display font-semibold text-ink text-lg leading-snug group-hover:text-vermilion transition-colors">{next.data.title}</span>
     </a>
   ) : (
     <div />

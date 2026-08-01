@@ -2,25 +2,313 @@
 @plugin "@tailwindcss/typography";
 @import "katex/dist/katex.css";
 
-@theme {
-  --font-serif: Georgia, "Noto Serif SC", serif;
-  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+/* =========================================================
+   INK & VELLUM / INK & MIDNIGHT
+   Editorial Scholar's Atelier — dual modes.
+   Light: warm parchment, deep ink, vermilion seal.
+   Dark:  warm midnight black, vellum text, glowing seal.
+   ========================================================= */
+
+/* ----- Semantic tokens (switchable) ----- */
+:root {
+  /* Paper tones — light */
+  --paper: #f4ede0;
+  --paper-2: #ede4d3;
+  --paper-3: #e6dbc6;
+
+  /* Ink tones — light (dark text) */
+  --ink: #1c1814;
+  --ink-2: #3a322a;
+  --ink-3: #6b5d4f;
+  --ink-4: #94886f;
+
+  /* Hairlines */
+  --rule: #d9cfb8;
+  --rule-2: #c7bb9e;
+
+  /* Vermilion seal */
+  --vermilion: #b8412c;
+  --vermilion-2: #9a3522;
+  --vermilion-soft: #d97757;
+
+  /* Aged gold */
+  --gold: #a8843a;
+
+  /* Ambient glows */
+  --glow-1: rgba(184, 65, 44, 0.05);
+  --glow-2: rgba(168, 132, 58, 0.04);
+
+  /* Grain opacity */
+  --grain-opacity: 0.035;
+
+  /* Inline code */
+  --code-bg: rgba(184, 65, 44, 0.08);
+  --code-border: rgba(184, 65, 44, 0.12);
+  --code-text: var(--vermilion-2);
+
+  /* Code block border ring (terminal inset) */
+  --code-ring: rgba(255, 255, 255, 0.4);
 }
 
-/* ===== Code Blocks ===== */
+[data-theme="dark"] {
+  /* Paper tones — dark (warm midnight) */
+  --paper: #15120d;
+  --paper-2: #1d1913;
+  --paper-3: #271f17;
+
+  /* Ink tones — dark (light text) */
+  --ink: #ece2cf;
+  --ink-2: #cdc0a7;
+  --ink-3: #9c8f74;
+  --ink-4: #6a6152;
+
+  /* Hairlines */
+  --rule: #322c25;
+  --rule-2: #443c32;
+
+  /* Vermilion — brighter for contrast on black */
+  --vermilion: #d9663f;
+  --vermilion-2: #c9542e;
+  --vermilion-soft: #e89070;
+
+  /* Aged gold — brighter */
+  --gold: #c79a4e;
+
+  /* Ambient glows */
+  --glow-1: rgba(217, 102, 63, 0.07);
+  --glow-2: rgba(199, 154, 78, 0.05);
+
+  /* Grain — slightly more visible on dark */
+  --grain-opacity: 0.05;
+
+  /* Inline code */
+  --code-bg: rgba(217, 102, 63, 0.12);
+  --code-border: rgba(217, 102, 63, 0.18);
+  --code-text: var(--vermilion-soft);
+
+  /* Code block ring — soften on dark */
+  --code-ring: rgba(255, 255, 255, 0.08);
+}
+
+/* ----- Map tokens to Tailwind theme (inline = switchable) ----- */
+@theme inline {
+  /* Typography */
+  --font-display: "Fraunces", "Noto Serif SC", Georgia, serif;
+  --font-serif: "Newsreader", "Noto Serif SC", Georgia, serif;
+  --font-newsreader: "Newsreader", "Noto Serif SC", Georgia, serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+
+  /* Paper tones */
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+
+  /* Ink tones */
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+
+  /* Hairlines */
+  --color-rule: var(--rule);
+  --color-rule-2: var(--rule-2);
+
+  /* Vermilion */
+  --color-vermilion: var(--vermilion);
+  --color-vermilion-2: var(--vermilion-2);
+  --color-vermilion-soft: var(--vermilion-soft);
+
+  /* Gold */
+  --color-gold: var(--gold);
+
+  /* Terminal ink */
+  --color-terminal: #1b1c2b;
+}
+
+/* ===== Base ===== */
+html {
+  background-color: var(--paper);
+  /* subtle warm gradient ambience via layered backgrounds */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, var(--glow-1), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, var(--glow-2), transparent 70%);
+  background-attachment: fixed;
+}
+
+body {
+  background-color: transparent;
+  /* paper grain — tiny SVG noise */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  font-feature-settings: "onum" 1, "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Grain opacity adapts to theme */
+body {
+  background-blend-mode: multiply;
+}
+[data-theme="dark"] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  background-blend-mode: screen;
+}
+
+/* Smooth theme transition (skip for users who prefer reduced motion) */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, fill 0.4s ease !important;
+}
+
+::selection {
+  background: var(--vermilion);
+  color: var(--paper);
+}
+
+/* Old-style figures for dates/metadata (already on body, but enforce on time) */
+time {
+  font-feature-settings: "onum" 1;
+}
+
+/* ===== Editorial prose ===== */
+.prose {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: var(--color-ink-2);
+}
+
+.prose p {
+  margin-top: 1.4em;
+  margin-bottom: 1.4em;
+  hyphens: auto;
+}
+
+/* Drop cap on the first paragraph of an article body */
+.prose.lead-drop > p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 3.6em;
+  line-height: 0.82;
+  float: left;
+  margin: 0.08em 0.12em 0 -0.04em;
+  color: var(--color-vermilion);
+  font-feature-settings: "ss01" 1;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.prose h2 {
+  font-size: 1.85rem;
+  margin-top: 2.6em;
+  margin-bottom: 0.8em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--color-rule);
+  position: relative;
+}
+
+.prose h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 2.5rem;
+  height: 2px;
+  background: var(--color-vermilion);
+}
+
+.prose h3 {
+  font-size: 1.4rem;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
+}
+
+.prose a {
+  color: var(--color-vermilion);
+  text-decoration: underline;
+  text-decoration-color: rgba(184, 65, 44, 0.35);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 0.2s;
+}
+
+.prose a:hover {
+  text-decoration-color: var(--color-vermilion);
+}
+
+.prose strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.prose blockquote {
+  font-style: italic;
+  border-left: 2px solid var(--color-vermilion);
+  background: var(--code-bg);
+  padding: 0.6em 1.2em;
+  margin: 1.8em 0;
+  color: var(--color-ink-2);
+}
+
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: none;
+}
+
+.prose ul, .prose ol {
+  padding-left: 1.5em;
+  margin: 1.2em 0;
+}
+
+.prose li {
+  margin: 0.4em 0;
+}
+
+.prose li::marker {
+  color: var(--color-vermilion);
+}
+
+.prose hr {
+  border: none;
+  text-align: center;
+  margin: 3em 0;
+  height: auto;
+}
+
+.prose hr::before {
+  content: '❦';
+  display: inline-block;
+  font-size: 1.4rem;
+  color: var(--color-vermilion-soft);
+}
+
+.prose img {
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper-2);
+}
+
+/* ===== Code Blocks (dark terminal inset — editorial contrast) ===== */
 pre.astro-code {
   font-family: var(--font-mono);
   font-feature-settings: "liga" 1, "calt" 1;
   font-size: 0.875rem;
   line-height: 1.75;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: linear-gradient(135deg, #1b1c2b 0%, #181825 40%, #11111b 100%);
   box-shadow:
-    0 2px 20px rgba(0, 0, 0, 0.35),
+    0 1px 0 var(--code-ring),
+    0 6px 28px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  margin: 1.5rem 0;
-  padding: 2.5rem 1rem 1rem;
+  margin: 1.75rem 0;
+  padding: 2.5rem 1.25rem 1.25rem;
   position: relative;
   overflow-x: auto;
 }
@@ -50,12 +338,6 @@ pre.astro-code code span {
   font-family: inherit;
 }
 
-/* ===== Blockquote ===== */
-.prose blockquote p:first-of-type::before,
-.prose blockquote p:last-of-type::after {
-  content: none;
-}
-
 /* Scrollbar */
 pre.astro-code::-webkit-scrollbar {
   height: 6px;
@@ -64,7 +346,7 @@ pre.astro-code::-webkit-scrollbar-track {
   background: transparent;
 }
 pre.astro-code::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 3px;
 }
 
@@ -72,20 +354,20 @@ pre.astro-code::-webkit-scrollbar-thumb {
 :not(pre) > code {
   font-family: var(--font-mono);
   font-size: 0.85em;
-  padding: 0.15em 0.4em;
-  border-radius: 0.3rem;
-  background: rgba(99, 110, 123, 0.15);
-  color: #7dcfff;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.12em 0.4em;
+  border-radius: 0.25rem;
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
 }
 
 /* ===== Mermaid ===== */
 pre.mermaid {
   background: linear-gradient(135deg, #1b1c2b 0%, #181825 40%, #11111b 100%);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 1.5rem;
-  margin: 1.5rem 0;
+  margin: 1.75rem 0;
   text-align: center;
   overflow-x: auto;
 }
@@ -93,4 +375,90 @@ pre.mermaid {
 pre.mermaid svg {
   max-width: 100%;
   height: auto;
+}
+
+/* ===== Editorial utilities ===== */
+.label-caps {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+/* Faint top hairline that grows from center on hover for article cards */
+.card-rule {
+  position: relative;
+}
+.card-rule::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-vermilion);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-rule:hover::before {
+  width: 100%;
+}
+
+/* Page-load reveal */
+@keyframes ink-rise {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  animation: ink-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ===== Theme toggle (sun / moon swap) ===== */
+#theme-toggle,
+#theme-toggle-mobile {
+  display: inline-grid;
+  place-items: center;
+}
+#theme-toggle > svg,
+#theme-toggle-mobile > svg {
+  grid-area: 1 / 1;
+}
+/* Light mode (default): sun visible, moon hidden */
+.theme-moon {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+.theme-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+/* Dark mode: moon visible, sun hidden */
+[data-theme="dark"] .theme-sun {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+[data-theme="dark"] .theme-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* Custom scrollbar for the page */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-rule-2);
+  border: 2px solid var(--color-paper-2);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-4);
+}
+
+/* KaTeX: render math in ink */
+.katex {
+  color: var(--color-ink);
 }

@@ -12,24 +12,38 @@ for (const post of posts) {
 }
 
 const sortedTags = [...tagCount.entries()].sort((a, b) => b[1] - a[1]);
+const maxCount = sortedTags[0]?.[1] ?? 1;
 ---
 
 <BaseLayout title="Tags" description="All tags on Katrina's blog">
-  <section class="py-12">
-    <h1 class="text-4xl font-bold text-white mb-2">Tags</h1>
-    <p class="text-lg text-slate-400 mb-8">{sortedTags.length} tags in total</p>
+  <section class="reveal">
+    <header class="mb-12">
+      <p class="label-caps text-vermilion mb-4">§ Index of Subjects</p>
+      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3">
+        Tags
+      </h1>
+      <p class="font-newsreader text-lg text-ink-3 italic">
+        {sortedTags.length} subjects catalogued across {posts.length} entries.
+      </p>
+    </header>
 
     <div class="flex flex-wrap gap-3">
-      {sortedTags.map(([tag, count]) => (
-        <a
-          href={`/tags/${tag}`}
-          class="inline-flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-4 py-3
-                 hover:border-cyan-400/50 hover:bg-slate-800 transition-colors no-underline group"
-        >
-          <span class="text-cyan-400 group-hover:text-cyan-300 font-medium">#{tag}</span>
-          <span class="text-sm text-slate-500">{count} 篇</span>
-        </a>
-      ))}
+      {sortedTags.map(([tag, count], i) => {
+        // scale weight by frequency, like an editorial tag cloud
+        const scale = 0.85 + (count / maxCount) * 0.6;
+        return (
+          <a
+            href={`/tags/${tag}`}
+            class="group inline-flex items-baseline gap-2 border border-rule bg-paper-2/60 hover:bg-paper-3 hover:border-vermilion/40 px-4 py-2.5 no-underline transition-colors reveal"
+            style={`animation-delay: ${i * 30}ms; transform: scale(${scale}); transform-origin: center;`}
+          >
+            <span class="font-display font-semibold text-ink group-hover:text-vermilion transition-colors">
+              <span class="text-vermilion">#</span>{tag}
+            </span>
+            <span class="font-mono text-xs text-ink-4 tabular-nums">{count}</span>
+          </a>
+        );
+      })}
     </div>
   </section>
 </BaseLayout>
