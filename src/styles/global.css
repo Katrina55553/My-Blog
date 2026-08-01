@@ -185,18 +185,6 @@ time {
   hyphens: auto;
 }
 
-/* Drop cap on the first paragraph of an article body */
-.prose.lead-drop > p:first-of-type::first-letter {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 3.6em;
-  line-height: 0.82;
-  float: left;
-  margin: 0.08em 0.12em 0 -0.04em;
-  color: var(--color-vermilion);
-  font-feature-settings: "ss01" 1;
-}
-
 .prose h1, .prose h2, .prose h3, .prose h4 {
   font-family: var(--font-display);
   color: var(--color-ink);
