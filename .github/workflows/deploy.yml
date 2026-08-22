@@ -5,7 +5,22 @@ on:
     branches: [main]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type check (incl. content schema validation)
+        run: npx astro check
+      - name: Build (fails on invalid frontmatter/schema)
+        run: npm run build
+
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to server
