@@ -33,7 +33,10 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
-          ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_HOST" "
+          ssh -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=20 \
+              "$SERVER_USER@$SERVER_HOST" "
             cd ~/My-Blog
             git fetch origin
             git reset --hard origin/main
