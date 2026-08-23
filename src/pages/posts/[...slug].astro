@@ -126,6 +126,15 @@ const tocHeadings = extractHeadings(current.body || '');
       <Content />
     </div>
 
+    <aside class="not-prose mt-12 mb-8 flex items-center justify-center gap-2 border-t border-b border-rule py-5">
+      <svg class="w-4 h-4 text-vermilion shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      <p class="font-newsreader text-base text-ink-2 italic">
+        如果这篇对你有帮助，<a href="https://github.com/Katrina55553/My-Blog" target="_blank" rel="noopener noreferrer" class="not-italic text-vermilion hover:underline transition-colors">点个 Star 鼓励一下</a>
+      </p>
+    </aside>
+
     <PrevNext {prev} {next} />
   </article>
     </div>
