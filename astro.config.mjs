@@ -10,6 +10,10 @@ import rehypeSlug from 'rehype-slug';
 export default defineConfig({
   site: 'https://blog.cogod.cn',
   integrations: [sitemap()],
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [

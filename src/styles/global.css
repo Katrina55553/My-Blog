@@ -1,6 +1,13 @@
 @import "tailwindcss";
+/* Self-hosted fonts (fontsource) — bundled into /_astro/, no external CDN */
+@import "@fontsource-variable/fraunces/full.css";
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/newsreader/wght-italic.css";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource/noto-serif-sc/400.css";
+@import "@fontsource/noto-serif-sc/500.css";
+@import "@fontsource/noto-serif-sc/600.css";
 @plugin "@tailwindcss/typography";
-@import "katex/dist/katex.css";
 
 /* =========================================================
    INK & VELLUM / INK & MIDNIGHT
@@ -93,10 +100,10 @@
 /* ----- Map tokens to Tailwind theme (inline = switchable) ----- */
 @theme inline {
   /* Typography */
-  --font-display: "Fraunces", "Noto Serif SC", Georgia, serif;
-  --font-serif: "Newsreader", "Noto Serif SC", Georgia, serif;
-  --font-newsreader: "Newsreader", "Noto Serif SC", Georgia, serif;
-  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  --font-display: "Fraunces Variable", "Noto Serif SC", Georgia, serif;
+  --font-serif: "Newsreader Variable", "Noto Serif SC", Georgia, serif;
+  --font-newsreader: "Newsreader Variable", "Noto Serif SC", Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", "Fira Code", "Cascadia Code", monospace;
 
   /* Paper tones */
   --color-paper: var(--paper);
