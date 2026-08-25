@@ -40,7 +40,13 @@ jobs:
               "$SERVER_USER@$SERVER_HOST" '
             set -euo pipefail
             cd ~/My-Blog
-            git fetch origin
+            fetch_ok=0
+            for i in 1 2 3 4 5; do
+              if git fetch origin; then fetch_ok=1; break; fi
+              echo "git fetch failed (attempt $i), retrying in 5s..."
+              sleep 5
+            done
+            [ "$fetch_ok" = 1 ] || { echo "git fetch failed after 5 attempts"; exit 1; }
             git reset --hard origin/main
             git log --oneline -1
             docker compose down
