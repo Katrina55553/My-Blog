@@ -17,11 +17,11 @@ for (const post of sorted) {
 <BaseLayout title="Search" description="Search and browse all articles">
   <section class="reveal">
     <header class="mb-10">
-      <p class="label-caps text-vermilion mb-4">§ The Archive</p>
-      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3">
+      <p class="label-caps text-vermilion mb-4" data-i18n="search.kicker">§ The Archive</p>
+      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3" data-i18n="search.title">
         Search
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 italic">Filter the journal by title, tag, or keyword.</p>
+      <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="search.subtitle">Filter the journal by title, tag, or keyword.</p>
     </header>
 
     <!-- Search -->
@@ -33,6 +33,7 @@ for (const post of sorted) {
         type="text"
         id="archive-search"
         placeholder="Search the journal…"
+        data-i18n-placeholder="search.placeholder"
         class="w-full bg-paper-2/60 border border-rule hover:border-rule-2 rounded-none pl-11 pr-4 py-3 font-newsreader text-base text-ink placeholder-ink-4 italic
                focus:outline-none focus:border-vermilion focus:bg-paper-2 transition-colors"
         autocomplete="off"
@@ -47,17 +48,17 @@ for (const post of sorted) {
           <div class="flex items-baseline gap-4 mb-5">
             <h2 class="font-display font-semibold text-ink text-3xl tracking-tight">{year}</h2>
             <span class="h-px flex-1 bg-rule"></span>
-            <span class="label-caps text-ink-4">{yearPosts.length} {yearPosts.length === 1 ? 'entry' : 'entries'}</span>
+            <span class="label-caps text-ink-4" data-i18n="search.entries" data-i18n-params={JSON.stringify({ n: yearPosts.length })}>{yearPosts.length} {yearPosts.length === 1 ? 'entry' : 'entries'}</span>
           </div>
           <div class="space-y-4">
             {yearPosts.map((post) => {
               const { title, description } = post.data;
               const d = new Date(post.data.date);
-              const monthDay = d.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
+              const monthDay = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
               return (
                 <article class="group flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-6 border-b border-rule/60 pb-4" data-slug={post.slug}>
-                  <time class="font-mono text-xs text-ink-4 shrink-0 sm:w-28">{monthDay}</time>
+                  <time class="font-mono text-xs text-ink-4 shrink-0 sm:w-28" data-i18n-date={d.toISOString()} data-i18n-date-fmt="month-day">{monthDay}</time>
                   <div class="min-w-0">
                     <a
                       href={`/posts/${post.slug}`}
@@ -80,6 +81,11 @@ for (const post of sorted) {
 <script>
   let posts: Array<{ title: string; slug: string; tags: string[]; description: string }> = [];
 
+  function t(key: string, params?: Record<string, string | number>) {
+    const i = (window as any).__I18N__;
+    return i ? i.t(key, params) : key;
+  }
+
   async function loadPosts() {
     try {
       const res = await fetch('/search.json');
@@ -90,6 +96,7 @@ for (const post of sorted) {
   const input = document.getElementById('archive-search') as HTMLInputElement;
   const list = document.getElementById('archive-list')!;
   const count = document.getElementById('result-count')!;
+  let lastCount = -1; // -1 = no active query
 
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
@@ -100,6 +107,7 @@ for (const post of sorted) {
       articles.forEach((a) => (a.style.display = ''));
       yearGroups.forEach((g) => (g.style.display = ''));
       count.textContent = '';
+      lastCount = -1;
       return;
     }
 
@@ -127,7 +135,12 @@ for (const post of sorted) {
       g.style.display = hasVisible ? '' : 'none';
     });
 
-    count.textContent = `${visibleCount} found`;
+    lastCount = visibleCount;
+    count.textContent = t('search.found', { n: visibleCount });
+  });
+
+  document.addEventListener('langchange', () => {
+    if (lastCount >= 0) count.textContent = t('search.found', { n: lastCount });
   });
 
   loadPosts();

@@ -13,7 +13,7 @@ const { prev, next } = Astro.props;
   {prev ? (
     <a href={`/posts/${prev.slug}`} class="text-left no-underline group block">
       <span class="label-caps text-ink-4 block mb-2 flex items-center gap-1.5">
-        <span class="text-vermilion transition-transform group-hover:-translate-x-1">←</span> Previous
+        <span class="text-vermilion transition-transform group-hover:-translate-x-1">←</span> <span data-i18n="pn.previous">Previous</span>
       </span>
       <span class="font-display font-semibold text-ink text-lg leading-snug group-hover:text-vermilion transition-colors">{prev.data.title}</span>
     </a>
@@ -23,7 +23,7 @@ const { prev, next } = Astro.props;
   {next ? (
     <a href={`/posts/${next.slug}`} class="text-right no-underline group block">
       <span class="label-caps text-ink-4 block mb-2 flex items-center justify-end gap-1.5">
-        Next <span class="text-vermilion transition-transform group-hover:translate-x-1">→</span>
+        <span data-i18n="pn.next">Next</span> <span class="text-vermilion transition-transform group-hover:translate-x-1">→</span>
       </span>
       <span class="font-display font-semibold text-ink text-lg leading-snug group-hover:text-vermilion transition-colors">{next.data.title}</span>
     </a>

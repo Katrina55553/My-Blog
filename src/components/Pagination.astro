@@ -18,7 +18,7 @@ function pageUrl(p: number) {
     {current > 1 && (
       <a href={pageUrl(current - 1)} class="group flex items-center gap-2 px-4 py-2 no-underline transition-colors">
         <span class="text-vermilion transition-transform group-hover:-translate-x-1">←</span>
-        <span class="label-caps text-ink-3 group-hover:text-vermilion transition-colors">Prev</span>
+        <span class="label-caps text-ink-3 group-hover:text-vermilion transition-colors" data-i18n="pg.prev">Prev</span>
       </a>
     )}
     <span class="mx-2 h-5 w-px bg-rule"></span>
@@ -37,7 +37,7 @@ function pageUrl(p: number) {
     <span class="mx-2 h-5 w-px bg-rule"></span>
     {current < total && (
       <a href={pageUrl(current + 1)} class="group flex items-center gap-2 px-4 py-2 no-underline transition-colors">
-        <span class="label-caps text-ink-3 group-hover:text-vermilion transition-colors">Next</span>
+        <span class="label-caps text-ink-3 group-hover:text-vermilion transition-colors" data-i18n="pg.next">Next</span>
         <span class="text-vermilion transition-transform group-hover:translate-x-1">→</span>
       </a>
     )}

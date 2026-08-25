@@ -27,11 +27,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
 <BaseLayout title={`标签: #${tag}`} description={`Articles tagged with ${tag}`}>
   <section class="reveal">
     <header class="mb-12">
-      <p class="label-caps text-vermilion mb-4">§ Filed Under</p>
+      <p class="label-caps text-vermilion mb-4" data-i18n="tag.kicker">§ Filed Under</p>
       <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3">
         <span class="text-vermilion">#</span><span class="italic">{tag}</span>
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 italic">
+      <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="tag.count" data-i18n-params={JSON.stringify({ n: filtered.length })}>
         {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'} in this subject.
       </p>
     </header>
@@ -39,7 +39,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <div class="space-y-10">
       {filtered.map((post, i) => {
         const { title, date, tags, description } = post.data;
-        const formattedDate = date.toLocaleDateString('zh-CN', {
+        const formattedDate = date.toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
@@ -49,7 +49,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
           <article class="card-rule group">
             <div class="flex items-baseline gap-4 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(i + 1)}</span>
-              <time class="label-caps text-ink-4">{formattedDate}</time>
+              <time class="label-caps text-ink-4" data-i18n-date={date.toISOString()}>{formattedDate}</time>
             </div>
             <h3 class="font-display font-semibold text-ink text-2xl md:text-3xl tracking-tight mb-2 pl-11">
               <a href={`/posts/${post.slug}`} class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">

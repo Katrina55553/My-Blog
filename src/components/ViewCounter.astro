@@ -14,10 +14,23 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
     const CACHE_KEY = '__vc_data';
     const TTL = 30 * 60 * 1000; // 30 minutes
 
+    function t(key, params) {
+      const i = window.__I18N__;
+      return i ? i.t(key, params) : key;
+    }
+
+    let currentViews = 0;
+
     function display(entry) {
       if (!entry || typeof entry.y !== 'number' || entry.y <= 0) { el.remove(); return; }
-      el.textContent = entry.y === 1 ? '1 view' : `${entry.y} views`;
+      currentViews = entry.y;
+      el.textContent = t('vc.views', { n: entry.y });
     }
+
+    // Update text when site UI language changes
+    document.addEventListener('langchange', () => {
+      if (el.isConnected && currentViews > 0) el.textContent = t('vc.views', { n: currentViews });
+    });
 
     function fetchAndCache() {
       const now = Date.now();

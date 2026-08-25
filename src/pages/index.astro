@@ -26,14 +26,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     <!-- Editorial masthead -->
     <header class="reveal mb-14 md:mb-20">
-      <p class="label-caps text-vermilion mb-4">Vol. I · A Personal Journal of Computing</p>
-      <h1 class="font-display font-semibold text-ink tracking-tight text-5xl md:text-7xl leading-[0.95]">
+      <p class="label-caps text-vermilion mb-4" data-i18n="index.kicker">Vol. I · A Personal Journal of Computing</p>
+      <h1 class="font-display font-semibold text-ink tracking-tight text-5xl md:text-7xl leading-[0.95]" data-i18n-html="index.greeting">
         Hi, I’m <span class="italic text-vermilion">Katrina</span>.
       </h1>
       <div class="mt-6 flex items-start gap-4">
         <span class="hidden md:block mt-3 h-px w-16 bg-rule-2 shrink-0"></span>
         <p class="font-newsreader text-lg md:text-xl text-ink-2 leading-relaxed max-w-xl">
-          <span class="block mt-2 text-ink-3 text-sm italic">右上角 GitHub 求 star ~</span>
+          <span class="block mt-2 text-ink-3 text-sm italic" data-i18n="index.star">Star me on GitHub — top right ~</span>
         </p>
       </div>
     </header>
@@ -41,15 +41,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <!-- Section heading -->
     <div class="flex items-baseline justify-between border-b border-rule pb-3 mb-8">
       <h2 class="label-caps text-ink-2 flex items-center gap-3">
-        <span class="text-vermilion">§</span> Latest Dispatches
+        <span class="text-vermilion">§</span> <span data-i18n="index.latest">Latest Dispatches</span>
       </h2>
-      <span class="label-caps text-ink-4">{sorted.length} entries</span>
+      <span class="label-caps text-ink-4" data-i18n="index.entries" data-i18n-params={JSON.stringify({ n: sorted.length })}>{sorted.length} entries</span>
     </div>
 
     <div class="space-y-10">
       {pagePosts.map((post, i) => {
         const { title, date, tags, description } = post.data;
-        const formattedDate = date.toLocaleDateString('zh-CN', {
+        const formattedDate = date.toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
@@ -59,7 +59,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
           <article class="card-rule group reveal" style={`animation-delay: ${i * 90}ms`}>
             <div class="flex items-baseline gap-4 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(i + 1)}</span>
-              <time class="label-caps text-ink-4">{formattedDate}</time>
+              <time class="label-caps text-ink-4" data-i18n-date={date.toISOString()}>{formattedDate}</time>
               <span class="text-rule-2">·</span>
               <ViewCounter slug={post.slug} />
             </div>

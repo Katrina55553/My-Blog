@@ -12,15 +12,15 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 <BaseLayout title="Popular" description="Most viewed articles on Katrina's blog">
   <section class="reveal">
     <header class="mb-12">
-      <p class="label-caps text-vermilion mb-4">§ The Most-Read</p>
+      <p class="label-caps text-vermilion mb-4" data-i18n="popular.kicker">§ The Most-Read</p>
       <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3 flex flex-wrap items-baseline gap-x-4">
-        Popular
+        <span data-i18n="popular.title">Popular</span>
         <span id="total-views" class="font-newsreader font-normal text-base text-ink-4 italic">&mdash;</span>
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 italic">Ranked by readership, the laurels of the journal.</p>
+      <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="popular.subtitle">Ranked by readership, the laurels of the journal.</p>
     </header>
     <div id="popular-list" class="space-y-1">
-      <p class="font-newsreader text-ink-3 italic">Loading the ledger…</p>
+      <p class="font-newsreader text-ink-3 italic" data-i18n="popular.loading">Loading the ledger…</p>
     </div>
   </section>
 </BaseLayout>
@@ -32,9 +32,17 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
     const container = document.getElementById('popular-list');
     const posts = JSON.parse(JSON.stringify(postMap));
 
+    function t(key, params) {
+      const i = window.__I18N__;
+      return i ? i.t(key, params) : key;
+    }
+
     function pad(n) { return String(n).padStart(2, '0'); }
 
+    let lastData = null;
+
     function render(data) {
+      lastData = data;
       const list = Object.entries(posts)
         .map(([slug, meta]) => {
           const entry = data.find((item) => item.x === `/posts/${slug}`);
@@ -45,10 +53,10 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 
       const total = list.reduce((sum, p) => sum + p.views, 0);
       const tv = document.getElementById('total-views');
-      if (tv) tv.textContent = total > 0 ? `— ${total.toLocaleString()} total reads` : '';
+      if (tv) tv.textContent = total > 0 ? t('popular.totalReads', { n: total.toLocaleString() }) : '';
 
       if (list.length === 0) {
-        container.innerHTML = '<p class="font-newsreader text-ink-3 italic">No posts yet.</p>';
+        container.innerHTML = `<p class="font-newsreader text-ink-3 italic">${t('popular.noPosts')}</p>`;
         return;
       }
 
@@ -58,11 +66,13 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
         return `<span class="font-mono text-sm text-ink-4 tabular-nums">${pad(i + 1)}</span>`;
       };
 
+      const locale = (window.__I18N__ && window.__I18N__.getLang() === 'zh') ? 'zh-CN' : 'en-US';
+
       container.innerHTML = list
         .map((post, i) => {
-          const date = new Date(post.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+          const date = new Date(post.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
           const tags = post.tags?.map((t) => `<a href="/tags/${t}" class="font-mono text-xs text-ink-3 hover:text-vermilion no-underline transition-colors"><span class="text-vermilion">#</span>${t}</a>`).join(' ') || '';
-          const viewsText = post.views > 0 ? `${post.views.toLocaleString()} reads` : '&mdash;';
+          const viewsText = post.views > 0 ? t('popular.reads', { n: post.views.toLocaleString() }) : '&mdash;';
           const isTop = i === 0;
 
           return `
@@ -101,11 +111,16 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
       return null;
     }
 
+    // Re-render when site UI language changes
+    document.addEventListener('langchange', () => {
+      if (lastData) render(lastData);
+    });
+
     const cached = loadCache();
     if (cached) { render(cached); return; }
 
     fetchAndCache()
       .then((data) => render(data))
-      .catch(() => { container.innerHTML = '<p class="font-newsreader text-ink-3 italic">Failed to load the ledger.</p>'; });
+      .catch(() => { container.innerHTML = `<p class="font-newsreader text-ink-3 italic">${t('popular.failed')}</p>`; });
   })();
 </script>

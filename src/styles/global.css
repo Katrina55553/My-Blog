@@ -103,7 +103,7 @@
   --font-display: "Fraunces Variable", "Noto Serif SC", Georgia, serif;
   --font-serif: "Newsreader Variable", "Noto Serif SC", Georgia, serif;
   --font-newsreader: "Newsreader Variable", "Noto Serif SC", Georgia, serif;
-  --font-mono: "JetBrains Mono Variable", "Fira Code", "Cascadia Code", monospace;
+  --font-mono: "JetBrains Mono Variable", "Fira Code", "Cascadia Code", "Noto Serif SC", monospace;
 
   /* Paper tones */
   --color-paper: var(--paper);
@@ -379,6 +379,26 @@ pre.mermaid svg {
   letter-spacing: 0.22em;
   font-size: 0.7rem;
   font-weight: 500;
+}
+
+/* ===== 中文界面排版 ===== */
+/* CJK 没有斜体字形，禁用伪斜体（避免文字被强行倾斜变形） */
+html[lang="zh-CN"] .italic,
+html[lang="zh-CN"] .font-newsreader.italic,
+html[lang="zh-CN"] i {
+  font-style: normal;
+}
+/* 汉字标签：略微放大、放宽字距，形成疏排的编辑风格 */
+html[lang="zh-CN"] .label-caps {
+  letter-spacing: 0.3em;
+  font-size: 0.75rem;
+}
+/* 思源宋体视觉上偏大，正文与标题略缩，与西文字号平衡 */
+html[lang="zh-CN"] body {
+  font-size: 1rem;
+}
+html[lang="zh-CN"] h1 {
+  letter-spacing: 0.01em;
 }
 
 /* Faint top hairline that grows from center on hover for article cards */

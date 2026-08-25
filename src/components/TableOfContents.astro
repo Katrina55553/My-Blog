@@ -21,7 +21,8 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
     <button
       id="toc-toggle-btn"
       class="hidden xl:flex shrink-0 sticky top-20 w-7 h-10 items-center justify-center bg-paper-2/60 hover:bg-paper-3 border border-rule rounded-sm text-ink-4 hover:text-vermilion transition-colors cursor-pointer group"
-      aria-label="切换目录"
+      aria-label="Toggle table of contents"
+      data-i18n-aria-label="toc.toggle"
     >
       <svg id="toc-chevron" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 6L15 12L9 18" />
@@ -34,7 +35,7 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
     >
       <div class="toc-scroll sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto">
         <h3 class="label-caps text-ink-2 mb-4 flex items-center gap-2">
-          <span class="text-vermilion">§</span> Contents
+          <span class="text-vermilion">§</span> <span data-i18n="toc.contents">Contents</span>
         </h3>
         <nav class="relative">
           <div class="absolute left-0 top-0 bottom-0 w-px bg-rule"></div>

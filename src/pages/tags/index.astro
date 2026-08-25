@@ -18,11 +18,11 @@ const maxCount = sortedTags[0]?.[1] ?? 1;
 <BaseLayout title="Tags" description="All tags on Katrina's blog">
   <section class="reveal">
     <header class="mb-12">
-      <p class="label-caps text-vermilion mb-4">§ Index of Subjects</p>
-      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3">
+      <p class="label-caps text-vermilion mb-4" data-i18n="tags.kicker">§ Index of Subjects</p>
+      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3" data-i18n="tags.title">
         Tags
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 italic">
+      <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="tags.summary" data-i18n-params={JSON.stringify({ n: sortedTags.length, m: posts.length })}>
         {sortedTags.length} subjects catalogued across {posts.length} entries.
       </p>
     </header>

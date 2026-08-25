@@ -29,11 +29,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
 <BaseLayout title={`Page ${currentPage}`} description={`Page ${currentPage} of Katrina's blog`}>
   <section>
     <header class="reveal mb-12">
-      <p class="label-caps text-vermilion mb-4">§ Archive</p>
-      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05]">
+      <p class="label-caps text-vermilion mb-4" data-i18n="page.kicker">§ Archive</p>
+      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05]" data-i18n-html="page.title" data-i18n-params={JSON.stringify({ n: currentPage })}>
         Page <span class="italic text-vermilion">{currentPage}</span>
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 mt-3">
+      <p class="font-newsreader text-lg text-ink-3 mt-3" data-i18n="page.range" data-i18n-params={JSON.stringify({ a: start + 1, b: Math.min(start + perPage, sorted.length), c: sorted.length })}>
         Entries {start + 1}–{Math.min(start + perPage, sorted.length)} of {sorted.length}
       </p>
     </header>
@@ -41,7 +41,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <div class="space-y-10">
       {pagePosts.map((post, i) => {
         const { title, date, tags, description } = post.data;
-        const formattedDate = date.toLocaleDateString('zh-CN', {
+        const formattedDate = date.toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
@@ -51,7 +51,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
           <article class="card-rule group reveal" style={`animation-delay: ${i * 90}ms`}>
             <div class="flex items-baseline gap-4 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(start + i + 1)}</span>
-              <time class="label-caps text-ink-4">{formattedDate}</time>
+              <time class="label-caps text-ink-4" data-i18n-date={date.toISOString()}>{formattedDate}</time>
               <span class="text-rule-2">·</span>
               <ViewCounter slug={post.slug} />
             </div>
