@@ -10,7 +10,7 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
   (() => {
     const el = document.getElementById(`vc-${slug}`);
     if (!el) return;
-    const pageUrl = `/posts/${slug}`;
+    const pageUrls = [`/posts/${slug}`, `/posts/${slug}/`];
     const CACHE_KEY = '__vc_data';
     const TTL = 30 * 60 * 1000; // 30 minutes
 
@@ -25,6 +25,12 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
       if (!entry || typeof entry.y !== 'number' || entry.y <= 0) { el.remove(); return; }
       currentViews = entry.y;
       el.textContent = t('vc.views', { n: entry.y });
+    }
+
+    function findEntry(data) {
+      const matches = data.filter((item) => pageUrls.includes(item.x) && typeof item.y === 'number');
+      if (matches.length === 0) return null;
+      return { x: pageUrls[1], y: matches.reduce((sum, item) => sum + item.y, 0) };
     }
 
     // Update text when site UI language changes
@@ -54,7 +60,7 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 
     const cached = loadCache();
     if (cached) {
-      display(cached.find((item) => item.x === pageUrl));
+      display(findEntry(cached));
       return;
     }
 
@@ -65,7 +71,7 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
     }
 
     window[memKey].then((data) => {
-      display(data.find((item) => item.x === pageUrl));
+      display(findEntry(data));
     });
   })();
 </script>

@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -49,8 +53,9 @@ jobs:
             [ "$fetch_ok" = 1 ] || { echo "git fetch failed after 5 attempts"; exit 1; }
             git reset --hard origin/main
             git log --oneline -1
-            docker compose down
             docker compose build --no-cache
-            docker compose up -d
+            # The old container keeps serving until the new image builds.
+            # Compose then replaces it only after a successful build.
+            docker compose up -d --remove-orphans
             docker compose ps
           '

@@ -4,9 +4,20 @@
 @import "@fontsource-variable/newsreader";
 @import "@fontsource-variable/newsreader/wght-italic.css";
 @import "@fontsource-variable/jetbrains-mono";
-@import "@fontsource/noto-serif-sc/400.css";
-@import "@fontsource/noto-serif-sc/500.css";
-@import "@fontsource/noto-serif-sc/600.css";
+@font-face {
+  font-family: "Noto Serif SC";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Serif SC";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-600-normal.woff2") format("woff2");
+}
 @plugin "@tailwindcss/typography";
 
 /* =========================================================

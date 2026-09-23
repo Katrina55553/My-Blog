@@ -38,7 +38,7 @@ Tailwind v4 通过 Vite 插件而非 PostCSS 接入：
 - **Shiki**：代码高亮，主题 `github-dark`，`wrap: true`
 - **remark-math** + **rehype-katex**：LaTeX 公式（`$...$` 内联 / `$$...$$` 块级）
 - **rehype-slug**：自动为标题添加 `id` 锚点，用于目录跳转
-- **Mermaid**：自定义 rehype 插件将 ` ```mermaid ` 代码块转换为 `<pre class="mermaid">`，客户端通过 CDN 引入 mermaid.js 渲染 SVG
+- **Mermaid**：自定义 rehype 插件将 ` ```mermaid ` 代码块转换为 `<pre class="mermaid">`，客户端按需加载本地锁定版本并随明暗主题重绘
 
 ### Content Collections Schema（`src/content/config.ts`）
 
@@ -61,10 +61,10 @@ src/
 │   ├── config.ts              # Content Collections Schema
 │   └── posts/                 # Markdown 文章（*.md）
 ├── components/
-│   ├── Image.astro            # 图片优化 (astro:assets, lazy loading)
 │   ├── Pagination.astro       # 分页导航（首页 + 分页页共用）
 │   ├── PrevNext.astro         # 文章底部上一篇/下一篇
-│   └── Search.astro           # 客户端搜索 (fetch /search.json → 前端过滤)
+│   ├── TableOfContents.astro  # 文章目录
+│   └── ViewCounter.astro      # 阅读量（兼容历史有/无尾斜杠 URL）
 ├── layouts/
 │   └── BaseLayout.astro       # 全局布局（暗色主题、响应式导航、SEO meta）
 ├── pages/
@@ -75,12 +75,13 @@ src/
 │   ├── tags/
 │   │   ├── index.astro        # 标签总览（计数，按频次降序）
 │   │   └── [tag].astro        # 标签筛选（getStaticPaths 预生成）
-│   ├── archive.astro          # 归档（按年份分组）
-│   ├── about.astro            # 关于页
+│   ├── search.astro           # 归档 + 客户端搜索
+│   ├── popular.astro          # 阅读量排行
 │   ├── 404.astro              # 404 页面
 │   ├── robots.txt.ts          # robots.txt
 │   ├── search.json.ts         # 搜索索引 API
-│   └── og-image.svg.ts        # 社交分享默认封面
+│   └── og-image.png.ts        # 构建期生成社交分享 PNG
+├── assets/images/             # Markdown 本地图片（Astro 优化、尺寸、srcset）
 └── styles/
     └── global.css             # Tailwind v4 + typography + KaTeX + Mermaid
 astro.config.mjs               # Shiki + remark-math + rehype-katex-slug + Mermaid 插件
@@ -111,7 +112,7 @@ description: 文章摘要
 ### Docker 多阶段构建
 
 - **阶段 1**：`node:22-alpine` → `npm ci` → `npm run build`，产出 `/app/dist`
-- **阶段 2**：`nginx:alpine` + `gettext` → 复制 dist + `nginx.conf.template`，容器启动时 `envsubst` 注入 `UMAMI_API_KEY` 环境变量
+- **阶段 2**：`nginx:alpine` → 复制 `dist` 与静态 `nginx.conf`
 
 ### Nginx 路由规则
 
@@ -119,17 +120,18 @@ description: 文章摘要
 |------|----------|
 | `/_astro/*` | 1 年，immutable（打包哈希文件名） |
 | `/sitemap*` `/robots*` `/rss*` | 1 小时，public |
-| `/api/views/*` | 反向代理到 Umami API（nginx resolver 变量避免启动时 DNS 失败） |
+| 固定的 `/api/views/websites/.../metrics` | 宿主机 nginx 限速后反代到本机只读统计代理 |
 | 其他 HTML | 不缓存（内容更新即时生效） |
 
 额外：gzip 压缩、安全头（X-Frame-Options / X-Content-Type-Options / Referrer-Policy）。
 
 ### GitHub Actions 部署流程
 
-push main → SSH 到服务器 → `git reset --hard origin/main` → `docker compose down && build --no-cache && up -d`
+push main → 校验与构建 → SSH 到服务器 → `git reset --hard origin/main` → 保留旧容器完成 `docker compose build --no-cache` → `up -d` 替换
 
-- 服务器路径：`~/my-blog`，暴露端口 80
-- Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_PASSWORD`
+- 服务器路径：`~/My-Blog`，容器仅映射 `127.0.0.1:8080`
+- Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_SSH_KEY`
+- workflow 使用 `deploy-production` concurrency 组，连续推送会取消旧部署
 
 ## 工作流
 
@@ -145,4 +147,4 @@ push main → SSH 到服务器 → `git reset --hard origin/main` → `docker co
 `scripts/import-post.cjs` 自动处理 Obsidian 笔记：
 - 从文件名自动生成 slug
 - 修正日期格式：`2026-5-14` → `2026-05-14`
-- 转换 `![[image.png]]` → `![image](/images/...)`，递归搜索图片文件并复制到 `public/images/`
+- 转换 `![[image.png]]` 为 `src/assets/images/` 相对引用；文件名包含内容哈希，避免不同目录的同名图片互相覆盖

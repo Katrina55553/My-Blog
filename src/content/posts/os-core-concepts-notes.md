@@ -29,7 +29,7 @@ description: 操作系统核心概念整理，涵盖进程、线程、调度、�
 | **终止态** | 正常结束、异常退出或被强制终止        |     |
 
 
-![进程的状态](/images/process-states.png)
+![进程的状态](../../assets/images/process-states.png)
 
 
 ### 3. 进程的组织方式
@@ -171,10 +171,10 @@ description: 操作系统核心概念整理，涵盖进程、线程、调度、�
   - `full` = 0（满位数）
   - `mutex` = 1（读写互斥锁）
 
-![生产者消费者问题1](/images/producer-consumer-1.png)
+![生产者消费者问题1](../../assets/images/producer-consumer-1.png)
 
 
-![生产者消费者问题2](/images/producer-consumer-2.png)
+![生产者消费者问题2](../../assets/images/producer-consumer-2.png)
 
 
 **读者-写者问题**

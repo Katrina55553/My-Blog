@@ -1,5 +1,5 @@
 ---
-import 'katex/dist/katex.css';
+import katexCssUrl from 'katex/dist/katex.min.css?url';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PrevNext from '../../components/PrevNext.astro';
@@ -25,6 +25,13 @@ const next = idx < sorted.length - 1 ? sorted[idx + 1] : null;
 
 const { Content } = await current.render();
 const { title, date, tags, description } = current.data;
+const markdownWithoutCode = (current.body || '')
+  .replace(/```[\s\S]*?```/g, '')
+  .replace(/`[^`\n]*`/g, '');
+const hasMath =
+  /(^|[^\\])\$\$[\s\S]*?\$\$/m.test(markdownWithoutCode) ||
+  /(^|[^\\])\$(?![\s$])[^$\n]+?\$(?!\$)/m.test(markdownWithoutCode) ||
+  /\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/m.test(markdownWithoutCode);
 
 // Reading time: ~300 chars/min for mixed CJK/English
 const chars = current.body?.replace(/[\s\n]/g, '').length || 0;
@@ -34,6 +41,7 @@ const formattedDate = date.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
+  timeZone: 'UTC',
 });
 
 // 从 markdown body 中提取 h2/h3 标题，生成目录
@@ -72,6 +80,7 @@ const tocHeadings = extractHeadings(current.body || '');
 ---
 
 <BaseLayout title={title} description={description} pageType="article" wide>
+  {hasMath && <link slot="head" rel="stylesheet" href={katexCssUrl} />}
   <div class="flex justify-center gap-3">
     <!-- 主内容区 -->
     <div class="min-w-0 flex-1 max-w-3xl">
@@ -99,7 +108,7 @@ const tocHeadings = extractHeadings(current.body || '');
       <div class="flex flex-wrap items-center gap-x-3 gap-y-2 pb-4 border-b border-rule">
         <span class="label-caps text-ink-2">Katrina</span>
         <span class="text-rule-2">·</span>
-        <time class="label-caps text-ink-3" data-i18n-date={date.toISOString()}>{formattedDate}</time>
+        <time class="label-caps text-ink-3" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
         <span class="text-rule-2">·</span>
         <span class="label-caps text-ink-3" data-i18n="post.minRead" data-i18n-params={JSON.stringify({ n: minutes })}>{minutes} min read</span>
         <span class="text-rule-2">·</span>
@@ -108,7 +117,7 @@ const tocHeadings = extractHeadings(current.body || '');
       <div class="flex flex-wrap gap-x-4 gap-y-1 mt-4">
         {tags.map((tag: string) => (
           <a
-            href={`/tags/${tag}`}
+            href={`/tags/${tag}/`}
             class="font-mono text-xs text-ink-3 hover:text-vermilion no-underline transition-colors"
           >
             <span class="text-vermilion">#</span>{tag}
@@ -180,16 +189,34 @@ const tocHeadings = extractHeadings(current.body || '');
   </script>
 
   <script>
-    // 加载并初始化 Mermaid 图表渲染
-    const mermaidElements = document.querySelectorAll('.mermaid');
+    const mermaidElements = Array.from(document.querySelectorAll<HTMLElement>('pre.mermaid'));
     if (mermaidElements.length > 0) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js';
-      script.onload = () => {
-        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
-        mermaid.run({ querySelector: '.mermaid' });
-      };
-      document.head.appendChild(script);
+      const sources = mermaidElements.map((element) => element.textContent || '');
+      const { default: mermaid } = await import('mermaid');
+      let rendering = false;
+      let renderQueued = false;
+
+      async function renderMermaid() {
+        if (rendering) {
+          renderQueued = true;
+          return;
+        }
+        rendering = true;
+        do {
+          renderQueued = false;
+          const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+          mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral' });
+          mermaidElements.forEach((element, index) => {
+            element.removeAttribute('data-processed');
+            element.textContent = sources[index];
+          });
+          await mermaid.run({ nodes: mermaidElements });
+        } while (renderQueued);
+        rendering = false;
+      }
+
+      await renderMermaid();
+      document.addEventListener('themechange', () => void renderMermaid());
     }
   </script>
 </BaseLayout>

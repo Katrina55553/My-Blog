@@ -26,13 +26,15 @@ const fullTitle = `${title} | Katrina's blog`;
     <meta property="og:description" content={description || "Katrina's personal blog"} />
     <meta property="og:type" content={pageType} />
     <meta property="og:url" content={Astro.url} />
-    <meta property="og:image" content={new URL('/og-image.svg', Astro.url).href} />
+    <meta property="og:image" content={new URL('/og-image.png', Astro.url).href} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
-    <meta name="twitter:image" content={new URL('/og-image.svg', Astro.url).href} />
+    <meta name="twitter:image" content={new URL('/og-image.png', Astro.url).href} />
     <link rel="canonical" href={Astro.url} />
+    <slot name="head" />
     <script is:inline>
       // Set theme before paint to avoid FOUC. Reads saved pref, else OS preference.
       (function () {
@@ -64,11 +66,11 @@ const fullTitle = `${title} | Katrina's blog`;
           {[
             { href: '/', label: 'Home', title: 'Home', key: 'nav.home',
               icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />' },
-            { href: '/popular', label: 'Popular', title: 'Popular', key: 'nav.popular',
+            { href: '/popular/', label: 'Popular', title: 'Popular', key: 'nav.popular',
               icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />' },
-            { href: '/search', label: 'Search', title: 'Search', key: 'nav.search',
+            { href: '/search/', label: 'Search', title: 'Search', key: 'nav.search',
               icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />' },
-            { href: '/tags', label: 'Tags', title: 'Tags', key: 'nav.tags',
+            { href: '/tags/', label: 'Tags', title: 'Tags', key: 'nav.tags',
               icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />' },
           ].map((item) => (
             <a
@@ -166,9 +168,9 @@ const fullTitle = `${title} | Katrina's blog`;
           <div class="hidden peer-checked:block absolute top-16 right-0 left-0 bg-paper border-b border-rule shadow-[0_8px_30px_rgba(28,24,20,0.12)]">
             {[
               { href: '/', label: 'Home', key: 'nav.home' },
-              { href: '/popular', label: 'Popular', key: 'nav.popular' },
-              { href: '/search', label: 'Search', key: 'nav.search' },
-              { href: '/tags', label: 'Tags', key: 'nav.tags' },
+              { href: '/popular/', label: 'Popular', key: 'nav.popular' },
+              { href: '/search/', label: 'Search', key: 'nav.search' },
+              { href: '/tags/', label: 'Tags', key: 'nav.tags' },
             ].map((item) => (
               <a href={item.href} class="block px-5 py-3 label-caps text-ink-3 hover:bg-paper-2 hover:text-vermilion no-underline transition-colors border-b border-rule/60" data-i18n={item.key}>
                 {item.label}
@@ -227,6 +229,11 @@ const fullTitle = `${title} | Katrina's blog`;
           }, 500);
         }
 
+        function notifyTheme() {
+          var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+          document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: theme } }));
+        }
+
         toggles.forEach(function (btn) {
           btn.addEventListener('click', function () {
             var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -238,6 +245,7 @@ const fullTitle = `${title} | Katrina's blog`;
               document.documentElement.setAttribute('data-theme', 'dark');
               try { localStorage.setItem('theme', 'dark'); } catch (e) {}
             }
+            notifyTheme();
           });
         });
 
@@ -250,6 +258,7 @@ const fullTitle = `${title} | Katrina's blog`;
           } else {
             document.documentElement.removeAttribute('data-theme');
           }
+          notifyTheme();
         });
       })();
     </script>

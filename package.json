@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "verify": "astro check && astro build && node scripts/verify-build.cjs",
     "preview": "astro preview",
     "astro": "astro",
     "import": "node scripts/import-post.cjs"
@@ -18,6 +19,9 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^5.0.0",
+    "github-slugger": "2.0.0",
+    "katex": "0.16.46",
+    "mermaid": "11.12.0",
     "rehype-katex": "^7.0.1",
     "rehype-slug": "^6.0.0",
     "remark-math": "^6.0.0",

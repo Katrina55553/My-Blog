@@ -43,16 +43,17 @@ const pad = (n: number) => String(n).padStart(2, '0');
           year: 'numeric',
           month: 'long',
           day: 'numeric',
+          timeZone: 'UTC',
         });
 
         return (
           <article class="card-rule group">
             <div class="flex items-baseline gap-4 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(i + 1)}</span>
-              <time class="label-caps text-ink-4" data-i18n-date={date.toISOString()}>{formattedDate}</time>
+              <time class="label-caps text-ink-4" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
             </div>
             <h3 class="font-display font-semibold text-ink text-2xl md:text-3xl tracking-tight mb-2 pl-11">
-              <a href={`/posts/${post.slug}`} class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">
+              <a href={`/posts/${post.slug}/`} class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">
                 {title}
               </a>
             </h3>
@@ -60,7 +61,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
             <div class="flex flex-wrap gap-x-4 gap-y-1 pl-11">
               {tags.map((t: string) => (
                 <a
-                  href={`/tags/${t}`}
+                  href={`/tags/${t}/`}
                   class={`font-mono text-xs no-underline transition-colors ${t === tag ? 'text-vermilion font-medium' : 'text-ink-3 hover:text-vermilion'}`}
                 >
                   <span class="text-vermilion">#</span>{t}

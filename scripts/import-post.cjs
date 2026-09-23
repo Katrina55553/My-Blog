@@ -1,9 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const source = process.argv[2];
 if (!source) {
-  console.log('Usage: node scripts/import-post.js "path/to/article.md"');
+  console.log('Usage: node scripts/import-post.cjs "path/to/article.md"');
   process.exit(1);
 }
 
@@ -39,27 +40,35 @@ function findFile(dir, filename) {
 
 // Process Obsidian image embeds: ![[image.png]] or ![[subdir/image.png]]
 const imageRegex = /!\[\[([^\]]+?\.(?:png|jpg|jpeg|gif|svg|webp))\]\]/gi;
-const imagesDir = path.join('public', 'images');
+const imagesDir = path.join('src', 'assets', 'images');
 fs.mkdirSync(imagesDir, { recursive: true });
 
 content = content.replace(imageRegex, (fullMatch, imagePath) => {
   const imageName = path.basename(imagePath);
-  const imageSlug = imageName
+  const extension = path.extname(imageName).toLowerCase();
+  const imageSlug = path.basename(imageName, extension)
     .replace(/[^\w.-]/g, '-')
     .replace(/-+/g, '-')
-    .toLowerCase();
+    .replace(/^-|-$/g, '')
+    .toLowerCase() || 'image';
 
-  // Search recursively from source directory for the image file
-  const foundPath = findFile(sourceDir, imageName);
+  // Prefer the path written in the note; fall back to a recursive basename search.
+  const directPath = path.resolve(sourceDir, imagePath);
+  const foundPath = fs.existsSync(directPath) && fs.statSync(directPath).isFile()
+    ? directPath
+    : findFile(sourceDir, imageName);
   if (foundPath) {
-    const dest = path.join(imagesDir, imageSlug);
-    fs.copyFileSync(foundPath, dest);
-    console.log(`  Copied image: ${imageSlug}`);
+    const bytes = fs.readFileSync(foundPath);
+    const digest = crypto.createHash('sha256').update(bytes).digest('hex').slice(0, 10);
+    const assetName = `${imageSlug}-${digest}${extension}`;
+    const dest = path.join(imagesDir, assetName);
+    if (!fs.existsSync(dest)) fs.copyFileSync(foundPath, dest, fs.constants.COPYFILE_EXCL);
+    console.log(`  Copied image: ${assetName}`);
+    return `![${imageName}](../../assets/images/${assetName})`;
   } else {
     console.log(`  Warning: image not found — ${imagePath}`);
+    return fullMatch;
   }
-
-  return `![${imageName}](/images/${imageSlug})`;
 });
 
 // Fix date format: 2026-5-14 -> 2026-05-14

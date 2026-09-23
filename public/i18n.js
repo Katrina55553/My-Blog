@@ -147,6 +147,14 @@
     return d.toLocaleDateString(locale(), opts);
   }
 
+  // Content dates are calendar dates, not instants. Parse their YYYY-MM-DD
+  // portion in local time so visitors west of UTC do not see the prior day.
+  function parseCalendarDate(value) {
+    var m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12);
+    return new Date(value);
+  }
+
   function parseParams(el) {
     var raw = el.getAttribute('data-i18n-params');
     if (!raw) return null;
@@ -168,7 +176,7 @@
       });
     });
     document.querySelectorAll('[data-i18n-date]').forEach(function (el) {
-      var d = new Date(el.getAttribute('data-i18n-date'));
+      var d = parseCalendarDate(el.getAttribute('data-i18n-date'));
       if (!isNaN(d)) el.textContent = formatDate(d, el.getAttribute('data-i18n-date-fmt'));
     });
 

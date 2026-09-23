@@ -11,7 +11,7 @@ const { prev, next } = Astro.props;
 
 <nav class="mt-16 pt-8 border-t border-rule grid grid-cols-2 gap-6">
   {prev ? (
-    <a href={`/posts/${prev.slug}`} class="text-left no-underline group block">
+    <a href={`/posts/${prev.slug}/`} class="text-left no-underline group block">
       <span class="label-caps text-ink-4 block mb-2 flex items-center gap-1.5">
         <span class="text-vermilion transition-transform group-hover:-translate-x-1">←</span> <span data-i18n="pn.previous">Previous</span>
       </span>
@@ -21,7 +21,7 @@ const { prev, next } = Astro.props;
     <div />
   )}
   {next ? (
-    <a href={`/posts/${next.slug}`} class="text-right no-underline group block">
+    <a href={`/posts/${next.slug}/`} class="text-right no-underline group block">
       <span class="label-caps text-ink-4 block mb-2 flex items-center justify-end gap-1.5">
         <span data-i18n="pn.next">Next</span> <span class="text-vermilion transition-transform group-hover:translate-x-1">→</span>
       </span>

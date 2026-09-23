@@ -287,7 +287,7 @@ function clickHandler(e: Event) {
 
 **事件冒泡** ： 当内部的button按钮点击之后，会将点击事件向上传递
 
-![Vue-基本语法-事件冒泡.png](/images/vue-.png)
+![Vue-基本语法-事件冒泡.png](../../assets/images/vue-.png)
 
 
 ```vue
@@ -593,6 +593,5 @@ watchEffect(()=>{
   console.log("we:", we.value)
 })
 ```
-
 
 

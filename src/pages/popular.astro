@@ -45,8 +45,10 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
       lastData = data;
       const list = Object.entries(posts)
         .map(([slug, meta]) => {
-          const entry = data.find((item) => item.x === `/posts/${slug}`);
-          const views = entry && typeof entry.y === 'number' ? entry.y : 0;
+          const paths = [`/posts/${slug}`, `/posts/${slug}/`];
+          const views = data
+            .filter((item) => paths.includes(item.x) && typeof item.y === 'number')
+            .reduce((sum, item) => sum + item.y, 0);
           return { slug, ...meta, views };
         })
         .sort((a, b) => b.views - a.views);
@@ -70,8 +72,12 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 
       container.innerHTML = list
         .map((post, i) => {
-          const date = new Date(post.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
-          const tags = post.tags?.map((t) => `<a href="/tags/${t}" class="font-mono text-xs text-ink-3 hover:text-vermilion no-underline transition-colors"><span class="text-vermilion">#</span>${t}</a>`).join(' ') || '';
+          const match = String(post.date).match(/^(\d{4})-(\d{2})-(\d{2})/);
+          const calendarDate = match
+            ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12)
+            : new Date(post.date);
+          const date = calendarDate.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+          const tags = post.tags?.map((t) => `<a href="/tags/${t}/" class="font-mono text-xs text-ink-3 hover:text-vermilion no-underline transition-colors"><span class="text-vermilion">#</span>${t}</a>`).join(' ') || '';
           const viewsText = post.views > 0 ? t('popular.reads', { n: post.views.toLocaleString() }) : '&mdash;';
           const isTop = i === 0;
 
@@ -79,7 +85,7 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
             <article class="card-rule group flex items-baseline gap-5 py-4 border-b border-rule">
               <div class="w-8 shrink-0 text-center">${rank(i)}</div>
               <div class="flex-1 min-w-0">
-                <a href="/posts/${post.slug}" class="font-display font-semibold text-ink text-lg leading-snug no-underline transition-colors group-hover:text-vermilion ${isTop ? 'md:text-xl' : ''}">${post.title}</a>
+                <a href="/posts/${post.slug}/" class="font-display font-semibold text-ink text-lg leading-snug no-underline transition-colors group-hover:text-vermilion ${isTop ? 'md:text-xl' : ''}">${post.title}</a>
                 <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 mt-1.5">
                   <time class="label-caps text-ink-4">${date}</time>
                   ${tags}

@@ -6,13 +6,31 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 
+/** @type {import('vite').Plugin} */
+const katexWoff2Only = {
+  name: 'katex-woff2-only',
+  enforce: 'pre',
+  transform(code, id) {
+    if (!id.replaceAll('\\', '/').includes('/katex/dist/katex.min.css')) return null;
+    return code.replace(
+      /,url\(fonts\/[^)]+\.woff\) format\("woff"\),url\(fonts\/[^)]+\.ttf\) format\("truetype"\)/g,
+      '',
+    );
+  },
+};
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://blog.cogod.cn',
+  trailingSlash: 'always',
   integrations: [sitemap()],
   prefetch: {
-    prefetchAll: true,
-    defaultStrategy: 'viewport',
+    prefetchAll: false,
+    defaultStrategy: 'hover',
+  },
+  image: {
+    layout: 'constrained',
+    responsiveStyles: true,
   },
   markdown: {
     remarkPlugins: [remarkMath],
@@ -61,6 +79,6 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [katexWoff2Only, tailwindcss()],
   },
 });

@@ -12,7 +12,7 @@ ORM（Object Relational Mapping，对象关系映射）是为了解决面向对�
 ORM 通过描述对象和数据库之间映射的元数据，将程序中的对象自动持久化到关系数据库中。
 ORM 框架的本质是简化编程中操作数据库的编码。
 
-![ORM](/images/orm.png)
+![ORM](../../assets/images/orm.png)
 
 ## MyBatis-Plus 介绍
 
@@ -60,7 +60,7 @@ mybatis-plus.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
 
 ## MyBatis CRUD 注解
 
-![MyBatis CRUD 注解](/images/mybatis-crud-.png)
+![MyBatis CRUD 注解](../../assets/images/mybatis-crud-.png)
 
 ```java
 @Mapper

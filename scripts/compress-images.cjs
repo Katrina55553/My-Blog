@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 原地压缩 public/images/*.png（引用零改动）。
+ * 原地压缩 src/assets/images/*.png（引用零改动）。
  *
  * 用法：
  *   node scripts/compress-images.cjs                 # 批量压缩（跳过 <50KB）
@@ -14,7 +14,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const sharp = require('sharp');
 
-const IMAGES_DIR = path.join(__dirname, '..', 'public', 'images');
+const IMAGES_DIR = path.join(__dirname, '..', 'src', 'assets', 'images');
 const MIN_SIZE = 50 * 1024; // 跳过 <50KB
 
 const args = process.argv.slice(2);

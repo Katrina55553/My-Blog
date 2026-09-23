@@ -7,7 +7,7 @@ const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime(
 
 const grouped = new Map<number, typeof sorted>();
 for (const post of sorted) {
-  const year = new Date(post.data.date).getFullYear();
+  const year = post.data.date.getUTCFullYear();
   if (!grouped.has(year)) grouped.set(year, []);
   grouped.get(year)!.push(post);
 }
@@ -37,6 +37,8 @@ for (const post of sorted) {
         class="w-full bg-paper-2/60 border border-rule hover:border-rule-2 rounded-none pl-11 pr-4 py-3 font-newsreader text-base text-ink placeholder-ink-4 italic
                focus:outline-none focus:border-vermilion focus:bg-paper-2 transition-colors"
         autocomplete="off"
+        disabled
+        aria-busy="true"
       />
       <span class="absolute right-4 top-1/2 -translate-y-1/2 label-caps text-ink-4 pointer-events-none hidden sm:block" id="result-count"></span>
     </div>
@@ -53,15 +55,15 @@ for (const post of sorted) {
           <div class="space-y-4">
             {yearPosts.map((post) => {
               const { title, description } = post.data;
-              const d = new Date(post.data.date);
-              const monthDay = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+              const d = post.data.date;
+              const monthDay = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
 
               return (
                 <article class="group flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-6 border-b border-rule/60 pb-4" data-slug={post.slug}>
-                  <time class="font-mono text-xs text-ink-4 shrink-0 sm:w-28" data-i18n-date={d.toISOString()} data-i18n-date-fmt="month-day">{monthDay}</time>
+                  <time class="font-mono text-xs text-ink-4 shrink-0 sm:w-28" data-i18n-date={d.toISOString().slice(0, 10)} data-i18n-date-fmt="month-day">{monthDay}</time>
                   <div class="min-w-0">
                     <a
-                      href={`/posts/${post.slug}`}
+                      href={`/posts/${post.slug}/`}
                       class="font-display font-semibold text-ink text-lg leading-snug no-underline transition-colors group-hover:text-vermilion"
                     >
                       {title}
@@ -90,7 +92,13 @@ for (const post of sorted) {
     try {
       const res = await fetch('/search.json');
       if (res.ok) posts = await res.json();
-    } catch (_) {}
+    } catch (_) {
+      // The server-rendered archive remains usable when the search index fails.
+    } finally {
+      input.disabled = false;
+      input.setAttribute('aria-busy', 'false');
+      applyFilter();
+    }
   }
 
   const input = document.getElementById('archive-search') as HTMLInputElement;
@@ -98,7 +106,7 @@ for (const post of sorted) {
   const count = document.getElementById('result-count')!;
   let lastCount = -1; // -1 = no active query
 
-  input.addEventListener('input', () => {
+  function applyFilter() {
     const q = input.value.trim().toLowerCase();
     const articles = list.querySelectorAll<HTMLElement>('article[data-slug]');
     const yearGroups = list.querySelectorAll<HTMLElement>('[data-year]');
@@ -137,7 +145,9 @@ for (const post of sorted) {
 
     lastCount = visibleCount;
     count.textContent = t('search.found', { n: visibleCount });
-  });
+  }
+
+  input.addEventListener('input', applyFilter);
 
   document.addEventListener('langchange', () => {
     if (lastCount >= 0) count.textContent = t('search.found', { n: lastCount });
