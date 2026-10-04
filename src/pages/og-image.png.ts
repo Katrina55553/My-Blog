@@ -23,7 +23,7 @@ export async function GET() {
       <line x1="74" y1="558" x2="1126" y2="558" stroke="#c7bb9e" stroke-width="2"/>
       <rect x="78" y="130" width="106" height="106" rx="7" fill="#b8412c"/>
       <text x="131" y="205" text-anchor="middle" font-family="Georgia, serif" font-size="64" font-weight="700" fill="#f4ede0">K</text>
-      <text x="78" y="340" font-family="Georgia, serif" font-size="78" font-weight="700" fill="#1c1814">Katrina’s Journal</text>
+      <text x="78" y="340" font-family="Georgia, serif" font-size="78" font-weight="700" fill="#1c1814">Katrina’s Blog</text>
       <text x="81" y="410" font-family="Georgia, serif" font-size="34" font-style="italic" fill="#6b5d4f">Code, books &amp; notes from the margins</text>
       <line x1="81" y1="456" x2="310" y2="456" stroke="#b8412c" stroke-width="5"/>
       <circle cx="1090" cy="498" r="34" fill="none" stroke="#b8412c" stroke-width="4"/>

@@ -53,15 +53,8 @@ const containerClass = wide === 'listing'
   <body class="text-ink-2 font-serif min-h-screen flex flex-col">
     <header class="sticky top-0 z-20 bg-paper/85 backdrop-blur-md border-b border-rule">
       <nav class={`mx-auto px-5 md:px-8 h-16 flex items-center justify-between ${containerClass}`}>
-        <a href="/" class="group flex items-center gap-3 no-underline">
-          <!-- vermilion seal mark -->
-          <span class="relative inline-flex items-center justify-center w-8 h-8 rounded-sm bg-vermilion text-paper font-display font-semibold text-lg shadow-[0_2px_0_rgba(154,53,34,1)] transition-transform group-hover:-rotate-6">
-            K
-            <span class="absolute inset-0 rounded-sm ring-1 ring-inset ring-paper/30"></span>
-          </span>
-          <span class="font-display text-lg font-semibold text-ink tracking-tight">
-            Katrina<span class="text-vermilion">’</span>s<span class="ml-2 text-ink-3 font-newsreader font-normal italic text-sm hidden sm:inline">journal</span>
-          </span>
+        <a href="/" class="brand-wordmark no-underline" aria-label="Katrina’s Blog">
+          Katrina’s Blog
         </a>
 
         <!-- Desktop nav -->
@@ -199,7 +192,7 @@ const containerClass = wide === 'listing'
           <span class="h-px w-12 bg-rule-2"></span>
         </div>
         <p class="label-caps text-ink-4">
-          &copy; {new Date().getFullYear()} · Katrina’s Journal
+          &copy; {new Date().getFullYear()} · Katrina’s Blog
         </p>
         <p class="font-newsreader text-xs text-ink-4 italic" data-i18n="footer.tagline">
           Set in Fraunces &amp; Newsreader · Printed on vellum
