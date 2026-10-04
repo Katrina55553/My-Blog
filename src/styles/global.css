@@ -486,6 +486,25 @@ html[lang="zh-CN"] h1 {
 }
 
 /* ===== Theme toggle (sun / moon swap) ===== */
+.github-badge-mark {
+  color: #1f2328;
+}
+.github-badge-name {
+  color: #57585e;
+}
+.github-badge-stats {
+  color: #707179;
+}
+[data-theme="dark"] .github-badge-mark {
+  color: #c2c4c9;
+}
+[data-theme="dark"] .github-badge-name {
+  color: #a9abb3;
+}
+[data-theme="dark"] .github-badge-stats {
+  color: #85878f;
+}
+
 #theme-toggle,
 #theme-toggle-mobile {
   display: inline-grid;

@@ -14,8 +14,6 @@
       'nav.tags': 'Tags',
       'theme.toggle': 'Toggle dark mode',
       'lang.toggle': 'Switch to Chinese',
-      'footer.tagline': 'Set in Fraunces & Newsreader · Printed on vellum',
-      'index.kicker': 'Vol. I · A Personal Journal of Computing',
       'index.greeting': 'Hi, I’m <span class="italic text-vermilion">Katrina</span>.',
       'index.star': 'Star me on GitHub — top right ~',
       'index.latest': 'Latest Dispatches',
@@ -70,8 +68,6 @@
       'nav.tags': '标签',
       'theme.toggle': '切换暗黑模式',
       'lang.toggle': '切换到英文',
-      'footer.tagline': 'Fraunces 与 Newsreader 排印 · 如印于羊皮纸',
-      'index.kicker': '卷一 · 一本关于计算的个人手记',
       'index.greeting': '你好，我是 <span class="italic text-vermilion">Katrina</span>',
       'index.star': '右上角 GitHub 求 star ~',
       'index.latest': '最新文章',
@@ -117,7 +113,7 @@
     }
   };
 
-  var lang = 'en';
+  var lang = 'zh';
   try {
     var saved = localStorage.getItem('lang');
     if (saved === 'zh' || saved === 'en') lang = saved;

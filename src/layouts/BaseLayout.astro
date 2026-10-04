@@ -16,7 +16,7 @@ const containerClass = wide === 'listing'
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -85,13 +85,13 @@ const containerClass = wide === 'listing'
           <button
             id="lang-toggle"
             type="button"
-            aria-label="Switch to Chinese"
-            title="Switch to Chinese"
+            aria-label="切换到英文"
+            title="切换到英文"
             data-i18n-aria-label="lang.toggle"
             data-i18n-title="lang.toggle"
             class="group relative p-1.5 transition-colors cursor-pointer"
           >
-            <span class="flex w-4 h-4 items-center justify-center text-[11px] tracking-[0.05em] font-semibold leading-none text-ink-3 group-hover:text-vermilion transition-colors">CN</span>
+            <span class="flex w-4 h-4 items-center justify-center text-[11px] tracking-[0.05em] font-semibold leading-none text-ink-3 group-hover:text-vermilion transition-colors">EN</span>
           </button>
           <button
             id="theme-toggle"
@@ -113,10 +113,32 @@ const containerClass = wide === 'listing'
             </svg>
           </button>
           <a href="https://github.com/Katrina55553/My-Blog" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"
-             class="group p-1.5 no-underline transition-colors">
-            <svg class="w-4 h-4 text-ink-3 group-hover:text-vermilion transition-colors" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
-            </svg>
+             class="group flex items-center gap-2.5 rounded-lg px-1.5 py-1 no-underline transition-colors hover:bg-paper-2">
+            <span class="grid h-6 w-6 shrink-0 place-items-center">
+              <svg class="github-badge-mark h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+            </span>
+            <span class="flex flex-col gap-1">
+              <span class="github-badge-name text-xs leading-4">My-Blog</span>
+              <span class="github-badge-stats flex items-center gap-2.5 font-mono text-[11px] leading-none" aria-label="22 stars, 1 fork">
+                <span class="flex items-center gap-1" title="22 stars">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 2.78 5.63 6.22.9-4.5 4.38 1.06 6.19L12 17.18l-5.56 2.92 1.06-6.19L3 9.53l6.22-.9L12 3Z" />
+                  </svg>
+                  <span>22</span>
+                </span>
+                <span class="flex items-center gap-1" title="1 fork">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="6" cy="5" r="2" />
+                    <circle cx="18" cy="5" r="2" />
+                    <circle cx="6" cy="19" r="2" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 7v10M18 7a6 6 0 0 1-6 6H9a3 3 0 0 0-3 3" />
+                  </svg>
+                  <span>1</span>
+                </span>
+              </span>
+            </span>
           </a>
         </div>
 
@@ -125,13 +147,13 @@ const containerClass = wide === 'listing'
           <button
             id="lang-toggle-mobile"
             type="button"
-            aria-label="Switch to Chinese"
-            title="Switch to Chinese"
+            aria-label="切换到英文"
+            title="切换到英文"
             data-i18n-aria-label="lang.toggle"
             data-i18n-title="lang.toggle"
             class="group relative p-2 transition-colors cursor-pointer"
           >
-            <span class="flex w-5 h-5 items-center justify-center text-[13px] tracking-[0.05em] font-semibold leading-none text-ink-3 group-hover:text-vermilion transition-colors">CN</span>
+            <span class="flex w-5 h-5 items-center justify-center text-[13px] tracking-[0.05em] font-semibold leading-none text-ink-3 group-hover:text-vermilion transition-colors">EN</span>
           </button>
           <button
             id="theme-toggle-mobile"
@@ -193,9 +215,6 @@ const containerClass = wide === 'listing'
         </div>
         <p class="label-caps text-ink-4">
           &copy; {new Date().getFullYear()} · Katrina’s Blog
-        </p>
-        <p class="font-newsreader text-xs text-ink-4 italic" data-i18n="footer.tagline">
-          Set in Fraunces &amp; Newsreader · Printed on vellum
         </p>
         <p class="font-mono text-xs text-ink-4">
           <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-vermilion transition-colors no-underline">
