@@ -6,7 +6,7 @@ on:
 
 concurrency:
   group: deploy-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -22,6 +22,8 @@ jobs:
         run: npx astro check
       - name: Build (fails on invalid frontmatter/schema)
         run: npm run build
+      - name: Verify generated routes and asset budgets
+        run: node scripts/verify-build.cjs
 
   deploy:
     needs: build
@@ -53,9 +55,35 @@ jobs:
             [ "$fetch_ok" = 1 ] || { echo "git fetch failed after 5 attempts"; exit 1; }
             git reset --hard origin/main
             git log --oneline -1
+            sudo -n true
             docker compose build --no-cache
             # The old container keeps serving until the new image builds.
             # Compose then replaces it only after a successful build.
             docker compose up -d --remove-orphans
             docker compose ps
+
+            # Keep the host nginx config in lockstep with the repository.
+            # Roll back the file if validation fails; the running nginx stays untouched.
+            nginx_site=/etc/nginx/sites-available/blog.cogod.cn
+            nginx_enabled=/etc/nginx/sites-enabled/blog.cogod.cn
+            nginx_backup=$(mktemp)
+            had_nginx_site=0
+            if sudo -n test -f "$nginx_site"; then
+              sudo -n cp "$nginx_site" "$nginx_backup"
+              had_nginx_site=1
+            fi
+            if ! sudo -n install -m 0644 host-nginx.conf "$nginx_site" || \
+               ! sudo -n ln -sfn "$nginx_site" "$nginx_enabled" || \
+               ! sudo -n nginx -t; then
+              if [ "$had_nginx_site" = 1 ]; then
+                sudo -n install -m 0644 "$nginx_backup" "$nginx_site"
+              else
+                sudo -n rm -f "$nginx_site" "$nginx_enabled"
+              fi
+              rm -f "$nginx_backup"
+              echo "nginx config validation failed; previous config restored"
+              exit 1
+            fi
+            sudo -n systemctl reload nginx
+            rm -f "$nginx_backup"
           '

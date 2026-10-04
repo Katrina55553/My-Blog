@@ -19,6 +19,30 @@ const assetFiles = filesUnder(path.join(dist, '_astro'));
 
 assert(fs.existsSync(path.join(dist, '404.html')), 'custom 404 page was not built');
 
+const canonicalRedirectSource = '^/[^.]*[^/]$';
+const canonicalRedirect = new RegExp(canonicalRedirectSource);
+const nginx = fs.readFileSync(path.join(root, 'nginx.conf'), 'utf8');
+const hostNginx = fs.readFileSync(path.join(root, 'host-nginx.conf'), 'utf8');
+assert(nginx.includes(`location ~ ${canonicalRedirectSource}`), 'container nginx has an unsafe canonical redirect');
+assert(hostNginx.includes(`$uri ~ ${canonicalRedirectSource}`), 'host nginx has an unsafe canonical redirect');
+
+for (const url of ['/404.html', '/robots.txt', '/sitemap-0.xml', '/i18n.js', '/search.json', '/og-image.png', '/']) {
+  assert(!canonicalRedirect.test(url), `static URL would be redirected: ${url}`);
+}
+for (const url of ['/posts/docker-guide', '/posts/not-found', '/page/2', '/tags/ACM']) {
+  assert(canonicalRedirect.test(url), `extensionless page would not be canonicalized: ${url}`);
+}
+
+for (const file of files) {
+  const relative = path.relative(dist, file).replaceAll(path.sep, '/');
+  const url = relative === 'index.html'
+    ? '/'
+    : relative.endsWith('/index.html')
+      ? `/${relative.slice(0, -'index.html'.length)}`
+      : `/${relative}`;
+  assert(!canonicalRedirect.test(url), `built URL would be redirected: ${url}`);
+}
+
 const og = fs.readFileSync(path.join(dist, 'og-image.png'));
 assert.equal(og.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', 'OG image is not a PNG');
 assert(allHtml.includes('/og-image.png'), 'pages do not reference the PNG OG image');
@@ -47,5 +71,14 @@ assert(!plainArticle.includes('katex.min.'), 'KaTeX CSS loaded on a non-math art
 for (const match of allHtml.matchAll(/href="(\/posts\/[^"#?]+)"/g)) {
   assert(match[1].endsWith('/'), `non-canonical post URL found: ${match[1]}`);
 }
+for (const match of allHtml.matchAll(/href="(\/page\/\d+[^"#?]*)"/g)) {
+  assert(match[1].endsWith('/'), `non-canonical pagination URL found: ${match[1]}`);
+}
+
+assert(fs.existsSync(path.join(dist, 'sitemap-index.xml')), 'sitemap index was not built');
+assert(
+  files.some((file) => /^sitemap-\d+\.xml$/.test(path.basename(file))),
+  'numbered sitemap was not built',
+);
 
 console.log(`Build verification passed: ${htmlFiles.length} HTML files, ${cssBytes} CSS bytes.`);
