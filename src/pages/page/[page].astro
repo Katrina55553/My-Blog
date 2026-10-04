@@ -6,7 +6,7 @@ import ViewCounter from '../../components/ViewCounter.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
-  const perPage = 5;
+  const perPage = 6;
   const totalPages = Math.ceil(posts.length / perPage);
 
   return Array.from({ length: totalPages - 1 }, (_, i) => ({
@@ -17,7 +17,7 @@ export async function getStaticPaths() {
 const posts = await getCollection('posts');
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-const perPage = 5;
+const perPage = 6;
 const totalPages = Math.ceil(sorted.length / perPage);
 const currentPage = Number(Astro.params.page!);
 const start = (currentPage - 1) * perPage;
@@ -26,7 +26,7 @@ const pagePosts = sorted.slice(start, start + perPage);
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title={`Page ${currentPage}`} description={`Page ${currentPage} of Katrina's blog`}>
+<BaseLayout title={`Page ${currentPage}`} description={`Page ${currentPage} of Katrina's blog`} wide="listing">
   <section>
     <header class="reveal mb-12">
       <p class="label-caps text-vermilion mb-4" data-i18n="page.kicker">§ Archive</p>
@@ -38,7 +38,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       </p>
     </header>
 
-    <div class="space-y-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
       {pagePosts.map((post, i) => {
         const { title, date, tags, description } = post.data;
         const formattedDate = date.toLocaleDateString('en-US', {
@@ -49,8 +49,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
         });
 
         return (
-          <article class="card-rule group reveal" style={`animation-delay: ${i * 90}ms`}>
-            <div class="flex items-baseline gap-4 mb-2">
+          <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${i * 90}ms`}>
+            <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(start + i + 1)}</span>
               <time class="label-caps text-ink-4" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
               <span class="text-rule-2">·</span>

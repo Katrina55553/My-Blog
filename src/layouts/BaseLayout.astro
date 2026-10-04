@@ -5,11 +5,14 @@ interface Props {
   title: string;
   description?: string;
   pageType?: 'website' | 'article';
-  wide?: boolean;
+  wide?: boolean | 'listing';
 }
 
 const { title, description, pageType = 'website', wide = false } = Astro.props;
 const fullTitle = `${title} | Katrina's blog`;
+const containerClass = wide === 'listing'
+  ? 'max-w-[90rem] lg:px-12'
+  : wide ? 'max-w-6xl' : 'max-w-3xl';
 ---
 
 <!doctype html>
@@ -49,7 +52,7 @@ const fullTitle = `${title} | Katrina's blog`;
   </head>
   <body class="text-ink-2 font-serif min-h-screen flex flex-col">
     <header class="sticky top-0 z-20 bg-paper/85 backdrop-blur-md border-b border-rule">
-      <nav class={`mx-auto px-5 md:px-8 h-16 flex items-center justify-between ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
+      <nav class={`mx-auto px-5 md:px-8 h-16 flex items-center justify-between ${containerClass}`}>
         <a href="/" class="group flex items-center gap-3 no-underline">
           <!-- vermilion seal mark -->
           <span class="relative inline-flex items-center justify-center w-8 h-8 rounded-sm bg-vermilion text-paper font-display font-semibold text-lg shadow-[0_2px_0_rgba(154,53,34,1)] transition-transform group-hover:-rotate-6">
@@ -184,12 +187,12 @@ const fullTitle = `${title} | Katrina's blog`;
       </nav>
     </header>
 
-    <main class={`flex-1 mx-auto px-5 md:px-8 py-10 md:py-14 w-full ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
+    <main class={`flex-1 mx-auto px-5 md:px-8 py-10 md:py-14 w-full ${containerClass}`}>
       <slot />
     </main>
 
     <footer class="border-t border-rule">
-      <div class={`mx-auto px-5 md:px-8 py-8 ${wide ? 'max-w-6xl' : 'max-w-3xl'} flex flex-col items-center gap-3`}>
+      <div class={`mx-auto px-5 md:px-8 py-8 ${containerClass} flex flex-col items-center gap-3`}>
         <div class="flex items-center gap-3 text-ink-4">
           <span class="h-px w-12 bg-rule-2"></span>
           <span class="font-display text-sm italic">❦</span>
