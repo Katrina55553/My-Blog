@@ -106,8 +106,6 @@ const tocHeadings = extractHeadings(current.body || '');
       <h1 class="font-display font-semibold text-ink tracking-tight text-3xl md:text-5xl leading-[1.1] mb-5">{title}</h1>
       <p class="font-newsreader text-lg text-ink-3 italic leading-relaxed mb-5">{description}</p>
       <div class="flex flex-wrap items-center gap-x-3 gap-y-2 pb-4 border-b border-rule">
-        <span class="label-caps text-ink-2">Katrina</span>
-        <span class="text-rule-2">·</span>
         <time class="label-caps text-ink-3" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
         <span class="text-rule-2">·</span>
         <span class="label-caps text-ink-3" data-i18n="post.minRead" data-i18n-params={JSON.stringify({ n: minutes })}>{minutes} min read</span>
@@ -136,7 +134,7 @@ const tocHeadings = extractHeadings(current.body || '');
       <Content />
     </div>
 
-    <aside class="not-prose mt-12 mb-8 flex items-center justify-center gap-2 border-t border-b border-rule py-5">
+    <aside class="not-prose mt-12 flex items-center justify-center gap-2 py-2">
       <svg class="w-4 h-4 text-vermilion shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
       </svg>

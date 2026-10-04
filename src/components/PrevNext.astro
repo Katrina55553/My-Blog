@@ -9,7 +9,7 @@ interface Props {
 const { prev, next } = Astro.props;
 ---
 
-<nav class="mt-16 pt-8 border-t border-rule grid grid-cols-2 gap-6">
+<nav class="mt-12 pt-8 border-t border-rule grid grid-cols-2 gap-6">
   {prev ? (
     <a href={`/posts/${prev.slug}/`} class="text-left no-underline group block">
       <span class="label-caps text-ink-4 block mb-2 flex items-center gap-1.5">
