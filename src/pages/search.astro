@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ViewCounter from '../components/ViewCounter.astro';
 
 const posts = await getCollection('posts');
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -12,11 +13,12 @@ for (const post of sorted) {
   grouped.get(year)!.push(post);
 }
 
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title="Search" description="Search and browse all articles">
-  <section class="reveal">
-    <header class="mb-10">
+<BaseLayout title="Search" description="Search and browse all articles" wide="listing">
+  <section>
+    <header class="reveal mb-10">
       <p class="label-caps text-vermilion mb-4" data-i18n="search.kicker">§ The Archive</p>
       <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3" data-i18n="search.title">
         Search
@@ -34,7 +36,7 @@ for (const post of sorted) {
         id="archive-search"
         placeholder="Search the journal…"
         data-i18n-placeholder="search.placeholder"
-        class="w-full bg-paper-2/60 border border-rule hover:border-rule-2 rounded-none pl-11 pr-4 py-3 font-newsreader text-base text-ink placeholder-ink-4 italic
+        class="w-full bg-paper-2/60 border border-rule hover:border-rule-2 rounded-none pl-11 pr-4 sm:pr-40 py-3 font-newsreader text-base text-ink placeholder-ink-4 italic
                focus:outline-none focus:border-vermilion focus:bg-paper-2 transition-colors"
         autocomplete="off"
         disabled
@@ -52,23 +54,34 @@ for (const post of sorted) {
             <span class="h-px flex-1 bg-rule"></span>
             <span class="label-caps text-ink-4" data-i18n="search.entries" data-i18n-params={JSON.stringify({ n: yearPosts.length })}>{yearPosts.length} {yearPosts.length === 1 ? 'entry' : 'entries'}</span>
           </div>
-          <div class="space-y-4">
-            {yearPosts.map((post) => {
-              const { title, description } = post.data;
-              const d = post.data.date;
-              const monthDay = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
+            {yearPosts.map((post, i) => {
+              const { title, date, tags, description } = post.data;
+              const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
               return (
-                <article class="group flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-6 border-b border-rule/60 pb-4" data-slug={post.slug}>
-                  <time class="font-mono text-xs text-ink-4 shrink-0 sm:w-28" data-i18n-date={d.toISOString().slice(0, 10)} data-i18n-date-fmt="month-day">{monthDay}</time>
-                  <div class="min-w-0">
+                <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${Math.min(i, 5) * 90}ms`} data-slug={post.slug}>
+                  <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
+                    <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(i + 1)}</span>
+                    <time class="label-caps text-ink-4" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
+                    <span class="text-rule-2">·</span>
+                    <ViewCounter slug={post.slug} />
+                  </div>
+                  <h3 class="font-display font-semibold text-ink text-2xl md:text-3xl tracking-tight mb-2 pl-11">
                     <a
                       href={`/posts/${post.slug}/`}
-                      class="font-display font-semibold text-ink text-lg leading-snug no-underline transition-colors group-hover:text-vermilion"
+                      class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]"
                     >
                       {title}
                     </a>
-                    <p class="font-newsreader text-sm text-ink-3 mt-1 leading-relaxed">{description}</p>
+                  </h3>
+                  <p class="font-newsreader text-ink-2 leading-relaxed pl-11 mb-3">{description}</p>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 pl-11">
+                    {tags.map((tag: string) => (
+                      <a href={`/tags/${tag}/`} class="font-mono text-xs text-ink-3 hover:text-vermilion transition-colors no-underline">
+                        <span class="text-vermilion">#</span>{tag}
+                      </a>
+                    ))}
                   </div>
                 </article>
               );

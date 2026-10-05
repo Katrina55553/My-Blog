@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ViewCounter from '../../components/ViewCounter.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -24,9 +25,9 @@ const filtered = posts
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title={`标签: #${tag}`} description={`Articles tagged with ${tag}`}>
-  <section class="reveal">
-    <header class="mb-12">
+<BaseLayout title={`标签: #${tag}`} description={`Articles tagged with ${tag}`} wide="listing">
+  <section>
+    <header class="reveal mb-12">
       <p class="label-caps text-vermilion mb-4" data-i18n="tag.kicker">§ Filed Under</p>
       <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3">
         <span class="text-vermilion">#</span><span class="italic">{tag}</span>
@@ -36,7 +37,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       </p>
     </header>
 
-    <div class="space-y-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
       {filtered.map((post, i) => {
         const { title, date, tags, description } = post.data;
         const formattedDate = date.toLocaleDateString('en-US', {
@@ -47,10 +48,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
         });
 
         return (
-          <article class="card-rule group">
-            <div class="flex items-baseline gap-4 mb-2">
+          <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${i * 90}ms`}>
+            <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(i + 1)}</span>
               <time class="label-caps text-ink-4" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
+              <span class="text-rule-2">·</span>
+              <ViewCounter slug={post.slug} />
             </div>
             <h3 class="font-display font-semibold text-ink text-2xl md:text-3xl tracking-tight mb-2 pl-11">
               <a href={`/posts/${post.slug}/`} class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">

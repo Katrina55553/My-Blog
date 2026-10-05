@@ -9,9 +9,9 @@ const postMap = Object.fromEntries(
 const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 ---
 
-<BaseLayout title="Popular" description="Most viewed articles on Katrina's blog">
-  <section class="reveal">
-    <header class="mb-12">
+<BaseLayout title="Popular" description="Most viewed articles on Katrina's blog" wide="listing">
+  <section>
+    <header class="reveal mb-12">
       <p class="label-caps text-vermilion mb-4" data-i18n="popular.kicker">§ The Most-Read</p>
       <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3 flex flex-wrap items-baseline gap-x-4">
         <span data-i18n="popular.title">Popular</span>
@@ -19,8 +19,8 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
       </h1>
       <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="popular.subtitle">Ranked by readership, the laurels of the journal.</p>
     </header>
-    <div id="popular-list" class="space-y-1">
-      <p class="font-newsreader text-ink-3 italic" data-i18n="popular.loading">Loading the ledger…</p>
+    <div id="popular-list" class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
+      <p class="font-newsreader text-ink-3 italic lg:col-span-2" data-i18n="popular.loading">Loading the ledger…</p>
     </div>
   </section>
 </BaseLayout>
@@ -58,15 +58,9 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
       if (tv) tv.textContent = total > 0 ? t('popular.totalReads', { n: total.toLocaleString() }) : '';
 
       if (list.length === 0) {
-        container.innerHTML = `<p class="font-newsreader text-ink-3 italic">${t('popular.noPosts')}</p>`;
+        container.innerHTML = `<p class="font-newsreader text-ink-3 italic lg:col-span-2">${t('popular.noPosts')}</p>`;
         return;
       }
-
-      // rank glyph: gold laurel for #1, ink for others
-      const rank = (i) => {
-        if (i === 0) return `<span class="font-display font-semibold text-gold text-xl">1</span>`;
-        return `<span class="font-mono text-sm text-ink-4 tabular-nums">${pad(i + 1)}</span>`;
-      };
 
       const locale = (window.__I18N__ && window.__I18N__.getLang() === 'zh') ? 'zh-CN' : 'en-US';
 
@@ -76,22 +70,24 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
           const calendarDate = match
             ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12)
             : new Date(post.date);
-          const date = calendarDate.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+          const date = calendarDate.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
           const tags = post.tags?.map((t) => `<a href="/tags/${t}/" class="font-mono text-xs text-ink-3 hover:text-vermilion no-underline transition-colors"><span class="text-vermilion">#</span>${t}</a>`).join(' ') || '';
           const viewsText = post.views > 0 ? t('popular.reads', { n: post.views.toLocaleString() }) : '&mdash;';
           const isTop = i === 0;
 
           return `
-            <article class="card-rule group flex items-baseline gap-5 py-4 border-b border-rule">
-              <div class="w-8 shrink-0 text-center">${rank(i)}</div>
-              <div class="flex-1 min-w-0">
-                <a href="/posts/${post.slug}/" class="font-display font-semibold text-ink text-lg leading-snug no-underline transition-colors group-hover:text-vermilion ${isTop ? 'md:text-xl' : ''}">${post.title}</a>
-                <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 mt-1.5">
-                  <time class="label-caps text-ink-4">${date}</time>
-                  ${tags}
-                </div>
+            <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style="animation-delay: ${Math.min(i, 5) * 90}ms">
+              <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
+                <span class="font-display ${isTop ? 'text-gold' : 'text-vermilion'} font-semibold text-sm w-7 shrink-0 tabular-nums">${pad(i + 1)}</span>
+                <time class="label-caps text-ink-4">${date}</time>
+                <span class="text-rule-2">·</span>
+                <span class="label-caps text-ink-4 tabular-nums">${viewsText}</span>
               </div>
-              <div class="label-caps text-ink-3 shrink-0 tabular-nums hidden sm:block">${viewsText}</div>
+              <h3 class="font-display font-semibold text-ink text-2xl md:text-3xl tracking-tight mb-2 pl-11">
+                <a href="/posts/${post.slug}/" class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">${post.title}</a>
+              </h3>
+              <p class="font-newsreader text-ink-2 leading-relaxed pl-11 mb-3">${post.description}</p>
+              <div class="flex flex-wrap gap-x-4 gap-y-1 pl-11">${tags}</div>
             </article>`;
         })
         .join('');
@@ -127,6 +123,6 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 
     fetchAndCache()
       .then((data) => render(data))
-      .catch(() => { container.innerHTML = `<p class="font-newsreader text-ink-3 italic">${t('popular.failed')}</p>`; });
+      .catch(() => { container.innerHTML = `<p class="font-newsreader text-ink-3 italic lg:col-span-2">${t('popular.failed')}</p>`; });
   })();
 </script>

@@ -15,7 +15,7 @@ const sortedTags = [...tagCount.entries()].sort((a, b) => b[1] - a[1]);
 const maxCount = sortedTags[0]?.[1] ?? 1;
 ---
 
-<BaseLayout title="Tags" description="All tags on Katrina's blog">
+<BaseLayout title="Tags" description="All tags on Katrina's blog" wide="listing">
   <section class="reveal">
     <header class="mb-12">
       <p class="label-caps text-vermilion mb-4" data-i18n="tags.kicker">§ Index of Subjects</p>
