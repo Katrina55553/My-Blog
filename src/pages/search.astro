@@ -36,7 +36,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
         type="text"
         id="archive-search"
         placeholder="搜索文章……"
-        class="w-full bg-paper-2/60 border border-rule hover:border-rule-2 rounded-none pl-11 pr-4 sm:pr-40 py-3 font-newsreader text-base text-ink placeholder-ink-4 italic
+        class="w-full bg-paper-2/60 border border-rule hover:border-rule-2 rounded-none pl-11 pr-4 sm:pr-40 py-3 text-base text-ink placeholder-ink-4
                focus:outline-none focus:border-vermilion focus:bg-paper-2 transition-colors"
         autocomplete="off"
         disabled
@@ -94,6 +94,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <Pagination id="search-pagination" current={1} total={Math.ceil(sorted.length / POSTS_PER_PAGE)} base="search/" client />
   </section>
 </BaseLayout>
+
+<style>
+  #archive-search {
+    /* Use the Chinese font's metrics to keep text centered beside the icon. */
+    font-family: "Noto Serif SC", "Newsreader Variable", Georgia, serif;
+  }
+</style>
 
 <script>
   import { POSTS_PER_PAGE } from '../lib/pagination';
