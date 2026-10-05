@@ -19,22 +19,22 @@
 
 ## 技术栈
 
-![Astro v5](https://img.shields.io/badge/Astro-5-BC52EE?style=for-the-badge&logo=astro&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![@tailwindcss/typography](https://img.shields.io/badge/%40tailwindcss%2Ftypography-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Astro 5.18.1](https://img.shields.io/badge/Astro-5.18.1-BC52EE?style=flat)
+![TypeScript 5.9.3](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?style=flat)
+![Tailwind CSS 4.3.0](https://img.shields.io/badge/Tailwind_CSS-4.3.0-06B6D4?style=flat)
+![@tailwindcss/typography 0.5.19](https://img.shields.io/badge/Typography-0.5.19-06B6D4?style=flat)
 
-![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white)
-![Astro Content Collections](https://img.shields.io/badge/Content_Collections-BC52EE?style=for-the-badge&logo=astro&logoColor=white)
-![Shiki github-dark](https://img.shields.io/badge/Shiki-github--dark-24292E?style=for-the-badge)
-![KaTeX](https://img.shields.io/badge/KaTeX-008080?style=for-the-badge)
-![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white)
-![Sharp](https://img.shields.io/badge/Sharp-99CC00?style=for-the-badge&logo=sharp&logoColor=white)
-![Umami Analytics](https://img.shields.io/badge/Umami_Analytics-000000?style=for-the-badge&logo=umami&logoColor=white)
+![Markdown](https://img.shields.io/badge/Markdown-%E2%9C%93-000000?style=flat)
+![Astro Content Collections](https://img.shields.io/badge/Content_Collections-%E2%9C%93-BC52EE?style=flat)
+![Shiki 3.23.0](https://img.shields.io/badge/Shiki-3.23.0-24292E?style=flat)
+![KaTeX 0.16.46](https://img.shields.io/badge/KaTeX-0.16.46-008080?style=flat)
+![Mermaid 11.12.0](https://img.shields.io/badge/Mermaid-11.12.0-FF3670?style=flat)
+![Sharp 0.35.3](https://img.shields.io/badge/Sharp-0.35.3-99CC00?style=flat)
+![Umami Analytics 自托管](https://img.shields.io/badge/Umami-self--hosted-000000?style=flat)
 
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-%E2%9C%93-2496ED?style=flat)
+![Nginx](https://img.shields.io/badge/Nginx-%E2%9C%93-009639?style=flat)
+![GitHub Actions CI/CD](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?style=flat)
 
 ## 项目结构
 
