@@ -1,45 +1,127 @@
 ---
+import { getPaginationPages } from '../lib/pagination';
+
 interface Props {
   current: number;
   total: number;
   base?: string;
+  client?: boolean;
+  id?: string;
 }
 
-const { current, total, base = '' } = Astro.props;
+const { current, total, base = '', client = false, id } = Astro.props;
+const pages = getPaginationPages(current, total);
+const queryPath = `/${base}`.replace(/\/+/g, '/');
+const pageClass = 'font-mono text-sm min-w-7 sm:min-w-9 h-9 px-1 flex items-center justify-center no-underline transition-colors text-ink-3 hover:text-vermilion hover:bg-paper-2 aria-[current=page]:bg-vermilion aria-[current=page]:text-paper aria-[current=page]:font-semibold';
+const ellipsisClass = 'font-mono text-sm min-w-7 sm:min-w-9 h-9 flex items-center justify-center text-ink-4';
 
 function pageUrl(p: number) {
+  if (client) return p === 1 ? queryPath : `${queryPath}?page=${p}`;
   if (p === 1) return '/';
   return `/${base}page/${p}/`.replace(/\/+/g, '/');
 }
 ---
 
-{total > 1 && (
-  <nav class="flex items-center justify-center gap-1 pt-14">
-    {current > 1 && (
-      <a href={pageUrl(current - 1)} class="group flex items-center gap-2 px-4 py-2 no-underline transition-colors">
+{(client || total > 1) && (
+  <blog-pagination id={id} class="block" data-client={client || undefined} data-current={current} data-total={total} data-path={queryPath}>
+  <nav class="flex flex-wrap items-center justify-center gap-0.5 sm:gap-1 pt-14" aria-label="分页导航" hidden={client || total <= 1}>
+      <a href={pageUrl(Math.max(1, current - 1))} data-page={Math.max(1, current - 1)} data-previous hidden={current <= 1} class="group flex shrink-0 items-center gap-2 px-2 sm:px-4 py-2 no-underline transition-colors" aria-label="上一页">
         <span class="text-vermilion transition-transform group-hover:-translate-x-1">←</span>
-        <span class="label-caps text-ink-3 group-hover:text-vermilion transition-colors" data-i18n="pg.prev">Prev</span>
+        <span class="sr-only sm:not-sr-only label-caps text-ink-3 group-hover:text-vermilion transition-colors">上一页</span>
       </a>
-    )}
-    <span class="mx-2 h-5 w-px bg-rule"></span>
-    {Array.from({ length: total }, (_, i) => i + 1).map((p) => (
+    <span class="hidden sm:block mx-2 h-5 w-px bg-rule"></span>
+    <span data-page-list class="flex flex-wrap items-center justify-center gap-0.5 sm:gap-1">
+    {pages.map((p) => p === 'ellipsis' ? (
+      <span class={ellipsisClass} aria-hidden="true">……</span>
+    ) : (
       <a
         href={pageUrl(p)}
-        class={`font-mono text-sm w-9 h-9 flex items-center justify-center no-underline transition-colors ${
-          p === current
-            ? 'bg-vermilion text-paper font-semibold'
-            : 'text-ink-3 hover:text-vermilion hover:bg-paper-2'
-        }`}
+        data-page={p}
+        aria-label={`第 ${p} 页`}
+        aria-current={p === current ? 'page' : undefined}
+        class={pageClass}
       >
         {p}
       </a>
     ))}
-    <span class="mx-2 h-5 w-px bg-rule"></span>
-    {current < total && (
-      <a href={pageUrl(current + 1)} class="group flex items-center gap-2 px-4 py-2 no-underline transition-colors">
-        <span class="label-caps text-ink-3 group-hover:text-vermilion transition-colors" data-i18n="pg.next">Next</span>
+    </span>
+    <span class="hidden sm:block mx-2 h-5 w-px bg-rule"></span>
+      <a href={pageUrl(Math.min(total, current + 1))} data-page={Math.min(total, current + 1)} data-next hidden={current >= total} class="group flex shrink-0 items-center gap-2 px-2 sm:px-4 py-2 no-underline transition-colors" aria-label="下一页">
+        <span class="sr-only sm:not-sr-only label-caps text-ink-3 group-hover:text-vermilion transition-colors">下一页</span>
         <span class="text-vermilion transition-transform group-hover:translate-x-1">→</span>
       </a>
-    )}
   </nav>
+  {client && (
+    <>
+      <template data-page-template><a class={pageClass}></a></template>
+      <template data-ellipsis-template><span class={ellipsisClass} aria-hidden="true">……</span></template>
+    </>
+  )}
+  </blog-pagination>
 )}
+
+<script>
+  import { getPaginationPages } from '../lib/pagination';
+
+  class BlogPagination extends HTMLElement {
+    connectedCallback() {
+      if (!this.hasAttribute('data-client')) return;
+
+      this.addEventListener('pagination:update', (event) => {
+        const { current, total } = (event as CustomEvent<{ current: number; total: number }>).detail;
+        this.update(current, total);
+      });
+
+      this.addEventListener('click', (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.defaultPrevented) return;
+        if (!(event.target instanceof Element)) return;
+        const link = event.target.closest<HTMLAnchorElement>('a[data-page]');
+        if (!link || !this.contains(link)) return;
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('pagination:change', { detail: { page: Number(link.dataset.page) }, bubbles: true }));
+      });
+    }
+
+    private pageUrl(page: number) {
+      const url = new URL(window.location.href);
+      url.pathname = this.dataset.path || url.pathname;
+      url.hash = '';
+      if (page === 1) url.searchParams.delete('page');
+      else url.searchParams.set('page', String(page));
+      return `${url.pathname}${url.search}`;
+    }
+
+    private update(current: number, total: number) {
+      const nav = this.querySelector<HTMLElement>('nav')!;
+      nav.hidden = total <= 1;
+      const previous = this.querySelector<HTMLAnchorElement>('[data-previous]')!;
+      const next = this.querySelector<HTMLAnchorElement>('[data-next]')!;
+      previous.hidden = current <= 1;
+      next.hidden = current >= total;
+      previous.dataset.page = String(Math.max(1, current - 1));
+      next.dataset.page = String(Math.min(total, current + 1));
+      previous.href = this.pageUrl(Number(previous.dataset.page));
+      next.href = this.pageUrl(Number(next.dataset.page));
+
+      const pageTemplate = this.querySelector<HTMLTemplateElement>('[data-page-template]')!;
+      const ellipsisTemplate = this.querySelector<HTMLTemplateElement>('[data-ellipsis-template]')!;
+      const fragment = document.createDocumentFragment();
+      for (const page of getPaginationPages(current, total)) {
+        if (page === 'ellipsis') {
+          fragment.append(ellipsisTemplate.content.cloneNode(true));
+          continue;
+        }
+        const link = pageTemplate.content.firstElementChild!.cloneNode(true) as HTMLAnchorElement;
+        link.textContent = String(page);
+        link.dataset.page = String(page);
+        link.href = this.pageUrl(page);
+        link.setAttribute('aria-label', `第 ${page} 页`);
+        if (page === current) link.setAttribute('aria-current', 'page');
+        fragment.append(link);
+      }
+      this.querySelector('[data-page-list]')!.replaceChildren(fragment);
+    }
+  }
+
+  if (!customElements.get('blog-pagination')) customElements.define('blog-pagination', BlogPagination);
+</script>

@@ -9,18 +9,17 @@ const postMap = Object.fromEntries(
 const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 ---
 
-<BaseLayout title="Popular" description="Most viewed articles on Katrina's blog" wide="listing">
+<BaseLayout title="热门" description="Katrina 的博客中阅读量最高的文章" wide="listing">
   <section>
     <header class="reveal mb-12">
-      <p class="label-caps text-vermilion mb-4" data-i18n="popular.kicker">§ The Most-Read</p>
+      <p class="label-caps text-vermilion mb-4">§ 最多阅读</p>
       <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3 flex flex-wrap items-baseline gap-x-4">
-        <span data-i18n="popular.title">Popular</span>
+        <span>热门</span>
         <span id="total-views" class="font-newsreader font-normal text-base text-ink-4 italic">&mdash;</span>
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="popular.subtitle">Ranked by readership, the laurels of the journal.</p>
     </header>
     <div id="popular-list" class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
-      <p class="font-newsreader text-ink-3 italic lg:col-span-2" data-i18n="popular.loading">Loading the ledger…</p>
+      <p class="font-newsreader text-ink-3 italic lg:col-span-2">正在加载……</p>
     </div>
   </section>
 </BaseLayout>
@@ -32,17 +31,9 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
     const container = document.getElementById('popular-list');
     const posts = JSON.parse(JSON.stringify(postMap));
 
-    function t(key, params) {
-      const i = window.__I18N__;
-      return i ? i.t(key, params) : key;
-    }
-
     function pad(n) { return String(n).padStart(2, '0'); }
 
-    let lastData = null;
-
     function render(data) {
-      lastData = data;
       const list = Object.entries(posts)
         .map(([slug, meta]) => {
           const paths = [`/posts/${slug}`, `/posts/${slug}/`];
@@ -55,31 +46,25 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 
       const total = list.reduce((sum, p) => sum + p.views, 0);
       const tv = document.getElementById('total-views');
-      if (tv) tv.textContent = total > 0 ? t('popular.totalReads', { n: total.toLocaleString() }) : '';
+      if (tv) tv.textContent = total > 0 ? `— 共 ${total.toLocaleString('zh-CN')} 次阅读` : '';
 
       if (list.length === 0) {
-        container.innerHTML = `<p class="font-newsreader text-ink-3 italic lg:col-span-2">${t('popular.noPosts')}</p>`;
+        container.innerHTML = '<p class="font-newsreader text-ink-3 italic lg:col-span-2">还没有文章。</p>';
         return;
       }
 
-      const locale = (window.__I18N__ && window.__I18N__.getLang() === 'zh') ? 'zh-CN' : 'en-US';
-
       container.innerHTML = list
         .map((post, i) => {
-          const match = String(post.date).match(/^(\d{4})-(\d{2})-(\d{2})/);
-          const calendarDate = match
-            ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12)
-            : new Date(post.date);
-          const date = calendarDate.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+          const date = new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
           const tags = post.tags?.map((t) => `<a href="/tags/${t}/" class="font-mono text-xs text-ink-3 hover:text-vermilion no-underline transition-colors"><span class="text-vermilion">#</span>${t}</a>`).join(' ') || '';
-          const viewsText = post.views > 0 ? t('popular.reads', { n: post.views.toLocaleString() }) : '&mdash;';
+          const viewsText = post.views > 0 ? `${post.views.toLocaleString('zh-CN')} 次阅读` : '&mdash;';
           const isTop = i === 0;
 
           return `
             <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style="animation-delay: ${Math.min(i, 5) * 90}ms">
               <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
                 <span class="font-display ${isTop ? 'text-gold' : 'text-vermilion'} font-semibold text-sm w-7 shrink-0 tabular-nums">${pad(i + 1)}</span>
-                <time class="label-caps text-ink-4">${date}</time>
+                <time class="label-caps text-ink-4" datetime="${String(post.date).slice(0, 10)}" lang="en">${date}</time>
                 <span class="text-rule-2">·</span>
                 <span class="label-caps text-ink-4 tabular-nums">${viewsText}</span>
               </div>
@@ -113,16 +98,11 @@ const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
       return null;
     }
 
-    // Re-render when site UI language changes
-    document.addEventListener('langchange', () => {
-      if (lastData) render(lastData);
-    });
-
     const cached = loadCache();
     if (cached) { render(cached); return; }
 
     fetchAndCache()
       .then((data) => render(data))
-      .catch(() => { container.innerHTML = `<p class="font-newsreader text-ink-3 italic lg:col-span-2">${t('popular.failed')}</p>`; });
+      .catch(() => { container.innerHTML = '<p class="font-newsreader text-ink-3 italic lg:col-span-2">加载失败。</p>'; });
   })();
 </script>

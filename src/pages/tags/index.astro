@@ -15,15 +15,14 @@ const sortedTags = [...tagCount.entries()].sort((a, b) => b[1] - a[1]);
 const maxCount = sortedTags[0]?.[1] ?? 1;
 ---
 
-<BaseLayout title="Tags" description="All tags on Katrina's blog" wide="listing">
+<BaseLayout title="标签" description="Katrina 的博客的全部标签" wide="listing">
   <section class="reveal">
     <header class="mb-12">
-      <p class="label-caps text-vermilion mb-4" data-i18n="tags.kicker">§ Index of Subjects</p>
-      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3" data-i18n="tags.title">
-        Tags
+      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3">
+        标签
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="tags.summary" data-i18n-params={JSON.stringify({ n: sortedTags.length, m: posts.length })}>
-        {sortedTags.length} subjects catalogued across {posts.length} entries.
+      <p class="font-newsreader text-lg text-ink-3 italic">
+        共 {posts.length} 篇文章，涵盖 {sortedTags.length} 个主题。
       </p>
     </header>
 

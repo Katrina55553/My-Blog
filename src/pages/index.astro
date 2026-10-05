@@ -3,46 +3,47 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Pagination from '../components/Pagination.astro';
 import ViewCounter from '../components/ViewCounter.astro';
+import { POSTS_PER_PAGE } from '../lib/pagination';
 
 const posts = await getCollection('posts');
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-const perPage = 6;
+const perPage = POSTS_PER_PAGE;
 const totalPages = Math.ceil(sorted.length / perPage);
 const pagePosts = sorted.slice(0, perPage);
 
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title="Home" description="Welcome to Katrina's personal blog" wide="listing">
+<BaseLayout title="首页" description="欢迎来到 Katrina 的个人博客" wide="listing">
   <section>
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebSite',
       name: "Katrina's blog",
-      description: "Katrina's personal blog",
+      description: 'Katrina 的个人博客',
       url: Astro.url,
     })} />
 
     <!-- Editorial masthead -->
     <header class="reveal mb-14 md:mb-20">
-      <h1 class="font-display font-semibold text-ink tracking-tight text-5xl md:text-7xl leading-[0.95]" data-i18n-html="index.greeting">
+      <h1 class="font-display font-semibold text-ink tracking-tight text-5xl md:text-7xl leading-[0.95]" lang="en">
         Hi, I’m <span class="italic text-vermilion">Katrina</span>.
       </h1>
       <div class="mt-6 flex items-start gap-4">
         <span class="hidden md:block mt-3 h-px w-16 bg-rule-2 shrink-0"></span>
         <p class="font-newsreader text-lg md:text-xl text-ink-2 leading-relaxed max-w-xl">
-          <span class="block mt-2 text-ink-3 text-sm italic" data-i18n="index.star">Star me on GitHub — top right ~</span>
+          <span class="block mt-2 text-ink-3 text-sm italic">右上角 GitHub 求 star ~</span>
         </p>
       </div>
     </header>
 
     <!-- Section heading -->
     <div class="flex items-baseline justify-between border-b border-rule pb-3 mb-8">
-      <h2 class="label-caps text-ink-2 flex items-center gap-3">
-        <span class="text-vermilion">§</span> <span data-i18n="index.latest">Latest Dispatches</span>
+      <h2 class="label-caps text-ink-2 flex items-center gap-3" lang="en">
+        <span class="text-vermilion">§</span> <span>Latest Dispatches</span>
       </h2>
-      <span class="label-caps text-ink-4" data-i18n="index.entries" data-i18n-params={JSON.stringify({ n: sorted.length })}>{sorted.length} entries</span>
+      <span class="label-caps text-ink-4">{sorted.length} 篇文章</span>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
@@ -59,7 +60,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
           <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${i * 90}ms`}>
             <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(i + 1)}</span>
-              <time class="label-caps text-ink-4" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
+              <time class="label-caps text-ink-4" datetime={date.toISOString().slice(0, 10)} lang="en">{formattedDate}</time>
               <span class="text-rule-2">·</span>
               <ViewCounter slug={post.slug} />
             </div>

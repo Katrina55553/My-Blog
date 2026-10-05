@@ -24,13 +24,12 @@ const containerClass = wide === 'listing'
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script is:inline src="/i18n.js"></script>
     <script defer src="/umami/script.js" data-website-id="ceead9d3-35d9-4590-8678-d153328378a6"></script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{fullTitle}</title>
-    <meta name="description" content={description || "Katrina's personal blog"} />
+    <meta name="description" content={description || 'Katrina 的个人博客'} />
     <meta property="og:title" content={fullTitle} />
-    <meta property="og:description" content={description || "Katrina's personal blog"} />
+    <meta property="og:description" content={description || 'Katrina 的个人博客'} />
     <meta property="og:type" content={pageType} />
     <meta property="og:url" content={Astro.url} />
     <meta property="og:image" content={new URL('/og-image.png', Astro.url).href} />
@@ -64,46 +63,31 @@ const containerClass = wide === 'listing'
         <!-- Desktop nav -->
         <div class="hidden md:flex items-center gap-1 shrink-0">
           {[
-            { href: '/', label: 'Home', title: 'Home', key: 'nav.home',
+            { href: '/', label: '首页',
               icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />' },
-            { href: '/popular/', label: 'Popular', title: 'Popular', key: 'nav.popular',
+            { href: '/popular/', label: '热门',
               icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />' },
-            { href: '/search/', label: 'Search', title: 'Search', key: 'nav.search',
+            { href: '/search/', label: '搜索',
               icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />' },
-            { href: '/tags/', label: 'Tags', title: 'Tags', key: 'nav.tags',
+            { href: '/tags/', label: '标签',
               icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />' },
           ].map((item) => (
             <a
               href={item.href}
-              title={item.title}
-              aria-label={item.title}
-              data-i18n-title={item.key}
-              data-i18n-aria-label={item.key}
+              title={item.label}
+              aria-label={item.label}
               class="group relative flex items-center gap-2 px-3 py-1.5 no-underline transition-colors"
             >
               <svg class="w-4 h-4 text-ink-3 group-hover:text-vermilion transition-colors" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" set:html={item.icon} />
-              <span class="label-caps text-ink-3 group-hover:text-ink transition-colors" data-i18n={item.key}>{item.label}</span>
+              <span class="label-caps text-ink-3 group-hover:text-ink transition-colors">{item.label}</span>
             </a>
           ))}
           <span class="mx-1 h-4 w-px bg-rule"></span>
           <button
-            id="lang-toggle"
-            type="button"
-            aria-label="切换到英文"
-            title="切换到英文"
-            data-i18n-aria-label="lang.toggle"
-            data-i18n-title="lang.toggle"
-            class="group relative p-1.5 transition-colors cursor-pointer"
-          >
-            <span class="flex w-4 h-4 items-center justify-center text-[11px] tracking-[0.05em] font-semibold leading-none text-ink-3 group-hover:text-vermilion transition-colors">EN</span>
-          </button>
-          <button
             id="theme-toggle"
             type="button"
-            aria-label="Toggle dark mode"
-            title="Toggle dark mode"
-            data-i18n-aria-label="theme.toggle"
-            data-i18n-title="theme.toggle"
+            aria-label="切换暗黑模式"
+            title="切换暗黑模式"
             class="group relative p-1.5 no-underline transition-colors cursor-pointer"
           >
             <!-- sun (light mode) -->
@@ -149,23 +133,10 @@ const containerClass = wide === 'listing'
         <!-- Mobile hamburger -->
         <div class="md:hidden flex items-center gap-1 ml-auto">
           <button
-            id="lang-toggle-mobile"
-            type="button"
-            aria-label="切换到英文"
-            title="切换到英文"
-            data-i18n-aria-label="lang.toggle"
-            data-i18n-title="lang.toggle"
-            class="group relative p-2 transition-colors cursor-pointer"
-          >
-            <span class="flex w-5 h-5 items-center justify-center text-[13px] tracking-[0.05em] font-semibold leading-none text-ink-3 group-hover:text-vermilion transition-colors">EN</span>
-          </button>
-          <button
             id="theme-toggle-mobile"
             type="button"
-            aria-label="Toggle dark mode"
-            title="Toggle dark mode"
-            data-i18n-aria-label="theme.toggle"
-            data-i18n-title="theme.toggle"
+            aria-label="切换暗黑模式"
+            title="切换暗黑模式"
             class="group relative p-2 no-underline transition-colors cursor-pointer"
           >
             <svg class="theme-sun w-5 h-5 text-ink-3 group-hover:text-vermilion transition-all duration-300 ease-out" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
@@ -177,24 +148,24 @@ const containerClass = wide === 'listing'
             </svg>
           </button>
           <input type="checkbox" id="menu-toggle" class="peer sr-only" />
-          <label for="menu-toggle" class="cursor-pointer p-2 block peer-checked:hidden" aria-label="Open menu">
+          <label for="menu-toggle" class="cursor-pointer p-2 block peer-checked:hidden" aria-label="打开菜单">
             <svg class="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </label>
-          <label for="menu-toggle" class="cursor-pointer p-2 hidden peer-checked:block" aria-label="Close menu">
+          <label for="menu-toggle" class="cursor-pointer p-2 hidden peer-checked:block" aria-label="关闭菜单">
             <svg class="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </label>
           <div class="hidden peer-checked:block absolute top-16 right-0 left-0 bg-paper border-b border-rule shadow-[0_8px_30px_rgba(28,24,20,0.12)]">
             {[
-              { href: '/', label: 'Home', key: 'nav.home' },
-              { href: '/popular/', label: 'Popular', key: 'nav.popular' },
-              { href: '/search/', label: 'Search', key: 'nav.search' },
-              { href: '/tags/', label: 'Tags', key: 'nav.tags' },
+              { href: '/', label: '首页' },
+              { href: '/popular/', label: '热门' },
+              { href: '/search/', label: '搜索' },
+              { href: '/tags/', label: '标签' },
             ].map((item) => (
-              <a href={item.href} class="block px-5 py-3 label-caps text-ink-3 hover:bg-paper-2 hover:text-vermilion no-underline transition-colors border-b border-rule/60" data-i18n={item.key}>
+              <a href={item.href} class="block px-5 py-3 label-caps text-ink-3 hover:bg-paper-2 hover:text-vermilion no-underline transition-colors border-b border-rule/60">
                 {item.label}
               </a>
             ))}

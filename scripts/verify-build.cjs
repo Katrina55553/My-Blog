@@ -26,7 +26,7 @@ const hostNginx = fs.readFileSync(path.join(root, 'host-nginx.conf'), 'utf8');
 assert(nginx.includes(`location ~ ${canonicalRedirectSource}`), 'container nginx has an unsafe canonical redirect');
 assert(hostNginx.includes(`$uri ~ ${canonicalRedirectSource}`), 'host nginx has an unsafe canonical redirect');
 
-for (const url of ['/404.html', '/robots.txt', '/sitemap-0.xml', '/i18n.js', '/search.json', '/og-image.png', '/']) {
+for (const url of ['/404.html', '/robots.txt', '/sitemap-0.xml', '/search.json', '/og-image.png', '/']) {
   assert(!canonicalRedirect.test(url), `static URL would be redirected: ${url}`);
 }
 for (const url of ['/posts/docker-guide', '/posts/not-found', '/page/2', '/tags/ACM']) {

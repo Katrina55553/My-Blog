@@ -25,15 +25,15 @@ const filtered = posts
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title={`标签: #${tag}`} description={`Articles tagged with ${tag}`} wide="listing">
+<BaseLayout title={`标签: #${tag}`} description={`标签为 ${tag} 的文章`} wide="listing">
   <section>
     <header class="reveal mb-12">
-      <p class="label-caps text-vermilion mb-4" data-i18n="tag.kicker">§ Filed Under</p>
+      <p class="label-caps text-vermilion mb-4">§ 归档于</p>
       <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3">
         <span class="text-vermilion">#</span><span class="italic">{tag}</span>
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="tag.count" data-i18n-params={JSON.stringify({ n: filtered.length })}>
-        {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'} in this subject.
+      <p class="font-newsreader text-lg text-ink-3 italic">
+        本主题共 {filtered.length} 篇。
       </p>
     </header>
 
@@ -51,7 +51,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
           <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${i * 90}ms`}>
             <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(i + 1)}</span>
-              <time class="label-caps text-ink-4" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
+              <time class="label-caps text-ink-4" datetime={date.toISOString().slice(0, 10)} lang="en">{formattedDate}</time>
               <span class="text-rule-2">·</span>
               <ViewCounter slug={post.slug} />
             </div>

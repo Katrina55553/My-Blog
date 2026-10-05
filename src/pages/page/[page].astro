@@ -3,10 +3,11 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Pagination from '../../components/Pagination.astro';
 import ViewCounter from '../../components/ViewCounter.astro';
+import { POSTS_PER_PAGE } from '../../lib/pagination';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
-  const perPage = 6;
+  const perPage = POSTS_PER_PAGE;
   const totalPages = Math.ceil(posts.length / perPage);
 
   return Array.from({ length: totalPages - 1 }, (_, i) => ({
@@ -17,7 +18,7 @@ export async function getStaticPaths() {
 const posts = await getCollection('posts');
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-const perPage = 6;
+const perPage = POSTS_PER_PAGE;
 const totalPages = Math.ceil(sorted.length / perPage);
 const currentPage = Number(Astro.params.page!);
 const start = (currentPage - 1) * perPage;
@@ -26,15 +27,14 @@ const pagePosts = sorted.slice(start, start + perPage);
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title={`Page ${currentPage}`} description={`Page ${currentPage} of Katrina's blog`} wide="listing">
+<BaseLayout title={`第 ${currentPage} 页`} description={`Katrina 的博客，第 ${currentPage} 页`} wide="listing">
   <section>
     <header class="reveal mb-12">
-      <p class="label-caps text-vermilion mb-4" data-i18n="page.kicker">§ Archive</p>
-      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05]" data-i18n-html="page.title" data-i18n-params={JSON.stringify({ n: currentPage })}>
-        Page <span class="italic text-vermilion">{currentPage}</span>
+      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05]">
+        第 <span class="italic text-vermilion">{currentPage}</span> 页
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 mt-3" data-i18n="page.range" data-i18n-params={JSON.stringify({ a: start + 1, b: Math.min(start + perPage, sorted.length), c: sorted.length })}>
-        Entries {start + 1}–{Math.min(start + perPage, sorted.length)} of {sorted.length}
+      <p class="font-newsreader text-lg text-ink-3 mt-3">
+        第 {start + 1}–{Math.min(start + perPage, sorted.length)} 篇，共 {sorted.length} 篇
       </p>
     </header>
 
@@ -52,7 +52,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
           <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${i * 90}ms`}>
             <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
               <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(start + i + 1)}</span>
-              <time class="label-caps text-ink-4" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
+              <time class="label-caps text-ink-4" datetime={date.toISOString().slice(0, 10)} lang="en">{formattedDate}</time>
               <span class="text-rule-2">·</span>
               <ViewCounter slug={post.slug} />
             </div>

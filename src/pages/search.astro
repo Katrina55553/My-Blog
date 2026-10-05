@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ViewCounter from '../components/ViewCounter.astro';
+import Pagination from '../components/Pagination.astro';
+import { POSTS_PER_PAGE } from '../lib/pagination';
 
 const posts = await getCollection('posts');
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -16,14 +18,13 @@ for (const post of sorted) {
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout title="Search" description="Search and browse all articles" wide="listing">
+<BaseLayout title="搜索" description="搜索和浏览全部文章" wide="listing">
   <section>
     <header class="reveal mb-10">
-      <p class="label-caps text-vermilion mb-4" data-i18n="search.kicker">§ The Archive</p>
-      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3" data-i18n="search.title">
-        Search
+      <h1 class="font-display font-semibold text-ink tracking-tight text-4xl md:text-5xl leading-[1.05] mb-3">
+        搜索
       </h1>
-      <p class="font-newsreader text-lg text-ink-3 italic" data-i18n="search.subtitle">Filter the journal by title, tag, or keyword.</p>
+      <p class="font-newsreader text-lg text-ink-3 italic">按标题、标签或关键词筛选文章。</p>
     </header>
 
     <!-- Search -->
@@ -34,8 +35,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       <input
         type="text"
         id="archive-search"
-        placeholder="Search the journal…"
-        data-i18n-placeholder="search.placeholder"
+        placeholder="搜索文章……"
         class="w-full bg-paper-2/60 border border-rule hover:border-rule-2 rounded-none pl-11 pr-4 sm:pr-40 py-3 font-newsreader text-base text-ink placeholder-ink-4 italic
                focus:outline-none focus:border-vermilion focus:bg-paper-2 transition-colors"
         autocomplete="off"
@@ -46,13 +46,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </div>
 
     <!-- Archive list -->
-    <div id="archive-list" class="space-y-12">
+    <div id="archive-list" class="space-y-12 scroll-mt-24">
       {[...grouped.entries()].map(([year, yearPosts]) => (
         <div data-year={year}>
           <div class="flex items-baseline gap-4 mb-5">
             <h2 class="font-display font-semibold text-ink text-3xl tracking-tight">{year}</h2>
             <span class="h-px flex-1 bg-rule"></span>
-            <span class="label-caps text-ink-4" data-i18n="search.entries" data-i18n-params={JSON.stringify({ n: yearPosts.length })}>{yearPosts.length} {yearPosts.length === 1 ? 'entry' : 'entries'}</span>
+            <span class="label-caps text-ink-4" data-year-count>{yearPosts.length} 篇文章</span>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
             {yearPosts.map((post, i) => {
@@ -60,10 +60,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
               const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
               return (
-                <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${Math.min(i, 5) * 90}ms`} data-slug={post.slug}>
+                <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${Math.min(i, 5) * 90}ms`} data-slug={post.slug} data-search={JSON.stringify([title, ...tags, description])}>
                   <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
-                    <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums">{pad(i + 1)}</span>
-                    <time class="label-caps text-ink-4" data-i18n-date={date.toISOString().slice(0, 10)}>{formattedDate}</time>
+                    <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums" data-entry-number>{pad(i + 1)}</span>
+                    <time class="label-caps text-ink-4" datetime={date.toISOString().slice(0, 10)} lang="en">{formattedDate}</time>
                     <span class="text-rule-2">·</span>
                     <ViewCounter slug={post.slug} />
                   </div>
@@ -90,81 +90,93 @@ const pad = (n: number) => String(n).padStart(2, '0');
         </div>
       ))}
     </div>
+    <p id="search-empty" class="font-newsreader text-ink-3 italic" role="status" hidden>没有找到匹配的文章。</p>
+    <Pagination id="search-pagination" current={1} total={Math.ceil(sorted.length / POSTS_PER_PAGE)} base="search/" client />
   </section>
 </BaseLayout>
 
 <script>
-  let posts: Array<{ title: string; slug: string; tags: string[]; description: string }> = [];
-
-  function t(key: string, params?: Record<string, string | number>) {
-    const i = (window as any).__I18N__;
-    return i ? i.t(key, params) : key;
-  }
-
-  async function loadPosts() {
-    try {
-      const res = await fetch('/search.json');
-      if (res.ok) posts = await res.json();
-    } catch (_) {
-      // The server-rendered archive remains usable when the search index fails.
-    } finally {
-      input.disabled = false;
-      input.setAttribute('aria-busy', 'false');
-      applyFilter();
-    }
-  }
+  import { POSTS_PER_PAGE } from '../lib/pagination';
 
   const input = document.getElementById('archive-search') as HTMLInputElement;
   const list = document.getElementById('archive-list')!;
   const count = document.getElementById('result-count')!;
-  let lastCount = -1; // -1 = no active query
+  const empty = document.getElementById('search-empty')!;
+  const pagination = document.getElementById('search-pagination')!;
+  const articles = Array.from(list.querySelectorAll<HTMLElement>('article[data-slug]'));
+  const yearGroups = Array.from(list.querySelectorAll<HTMLElement>('[data-year]'));
+  const posts = articles.map((article) => ({
+    article,
+    fields: (JSON.parse(article.dataset.search!) as string[]).map((field) => field.toLowerCase()),
+    year: article.closest<HTMLElement>('[data-year]')!.dataset.year!,
+  }));
+  let currentPage = 1;
 
-  function applyFilter() {
-    const q = input.value.trim().toLowerCase();
-    const articles = list.querySelectorAll<HTMLElement>('article[data-slug]');
-    const yearGroups = list.querySelectorAll<HTMLElement>('[data-year]');
-
-    if (!q) {
-      articles.forEach((a) => (a.style.display = ''));
-      yearGroups.forEach((g) => (g.style.display = ''));
-      count.textContent = '';
-      lastCount = -1;
-      return;
-    }
-
-    const matchSet = new Set(
-      posts
-        .filter(
-          (p) =>
-            p.title.toLowerCase().includes(q) ||
-            p.tags.some((t) => t.toLowerCase().includes(q)) ||
-            p.description.toLowerCase().includes(q),
-        )
-        .map((p) => p.slug),
-    );
-
-    let visibleCount = 0;
-    articles.forEach((a) => {
-      const visible = matchSet.has(a.dataset.slug!);
-      a.style.display = visible ? '' : 'none';
-      if (visible) visibleCount++;
-    });
-
-    yearGroups.forEach((g) => {
-      const visible = g.querySelectorAll<HTMLElement>('article[data-slug]');
-      const hasVisible = Array.from(visible).some((a) => a.style.display !== 'none');
-      g.style.display = hasVisible ? '' : 'none';
-    });
-
-    lastCount = visibleCount;
-    count.textContent = t('search.found', { n: visibleCount });
+  function readLocation() {
+    const params = new URLSearchParams(window.location.search);
+    input.value = params.get('q') || '';
+    const page = Number(params.get('page') || '1');
+    currentPage = Number.isSafeInteger(page) && page > 0 ? page : 1;
   }
 
-  input.addEventListener('input', applyFilter);
+  function updateLocation(mode: 'push' | 'replace') {
+    const url = new URL(window.location.href);
+    const query = input.value.trim();
+    if (query) url.searchParams.set('q', query);
+    else url.searchParams.delete('q');
+    if (currentPage > 1) url.searchParams.set('page', String(currentPage));
+    else url.searchParams.delete('page');
+    if (url.href !== window.location.href) {
+      if (mode === 'push') history.pushState(null, '', url);
+      else history.replaceState(null, '', url);
+    }
+  }
 
-  document.addEventListener('langchange', () => {
-    if (lastCount >= 0) count.textContent = t('search.found', { n: lastCount });
+  function render(mode: 'push' | 'replace' = 'replace') {
+    const query = input.value.trim().toLowerCase();
+    const matches = query ? posts.filter((post) => post.fields.some((field) => field.includes(query))) : posts;
+    const totalPages = Math.ceil(matches.length / POSTS_PER_PAGE);
+    currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
+    const start = (currentPage - 1) * POSTS_PER_PAGE;
+    const pagePosts = matches.slice(start, start + POSTS_PER_PAGE);
+    const visible = new Set(pagePosts.map((post) => post.article));
+    articles.forEach((article) => { article.hidden = !visible.has(article); });
+    pagePosts.forEach((post, index) => {
+      post.article.querySelector('[data-entry-number]')!.textContent = String(start + index + 1).padStart(2, '0');
+    });
+
+    const yearCounts = new Map<string, number>();
+    matches.forEach((post) => yearCounts.set(post.year, (yearCounts.get(post.year) || 0) + 1));
+    const visibleYears = new Set(pagePosts.map((post) => post.year));
+    yearGroups.forEach((group) => {
+      group.hidden = !visibleYears.has(group.dataset.year!);
+      group.querySelector('[data-year-count]')!.textContent = `${yearCounts.get(group.dataset.year!) || 0} 篇文章`;
+    });
+
+    count.textContent = query ? `找到 ${matches.length} 篇` : '';
+    empty.hidden = matches.length > 0;
+    updateLocation(mode);
+    pagination.dispatchEvent(new CustomEvent('pagination:update', { detail: { current: currentPage, total: totalPages } }));
+  }
+
+  await customElements.whenDefined('blog-pagination');
+  input.addEventListener('input', () => {
+    currentPage = 1;
+    render();
   });
-
-  loadPosts();
+  pagination.addEventListener('pagination:change', (event) => {
+    const page = (event as CustomEvent<{ page: number }>).detail.page;
+    if (page === currentPage) return;
+    currentPage = page;
+    render('push');
+    list.scrollIntoView({ block: 'start' });
+  });
+  window.addEventListener('popstate', () => {
+    readLocation();
+    render();
+  });
+  readLocation();
+  render();
+  input.disabled = false;
+  input.setAttribute('aria-busy', 'false');
 </script>
