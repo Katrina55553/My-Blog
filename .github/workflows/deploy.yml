@@ -3,6 +3,10 @@ name: Deploy
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Daily at 03:17 Asia/Shanghai (19:17 UTC on the preceding day).
+    - cron: '17 19 * * *'
 
 concurrency:
   group: deploy-production

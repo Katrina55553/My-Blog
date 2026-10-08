@@ -155,6 +155,10 @@ Umami、统计代理与 HTTPS 证书需在宿主机另行配置。直接运行�
 
 推送到 `main` 后，`.github/workflows/deploy.yml` 会先安装依赖，执行类型检查、构建和产物校验，通过后再 SSH 到服务器部署。
 
+工作流还会每天北京时间凌晨 `03:17`（UTC `19:17`）重新构建并部署，以刷新静态页面中的 GitHub Star/Fork 数量，无需推送新提交。推送和手动运行也会立即触发构建和部署。
+
+需要立即刷新或重试失败部署时，可在 GitHub Actions 的 `Deploy` 工作流中点击 `Run workflow`，选择 `main` 分支。上述配置推送到默认分支后生效。GitHub 的定时触发可能延迟，公开仓库连续 60 天没有活动时会自动停用定时工作流，需重新启用；参见 [GitHub 定时工作流说明](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)。
+
 仓库需配置以下 Actions Secrets：
 
 | Secret | 说明 |
@@ -181,4 +185,4 @@ Umami、统计代理与 HTTPS 证书需在宿主机另行配置。直接运行�
 | 社交分享图片内容 | `src/pages/og-image.png.ts` |
 | 域名、证书、统计代理地址与 website ID | `host-nginx.conf` |
 
-迁移站点时同步更新域名、GitHub 链接、Umami website ID 和备案信息。GitHub Star/Fork 数量在构建时获取，接口不可用时使用默认值，重新构建后更新展示。
+迁移站点时同步更新域名、GitHub 链接、Umami website ID 和备案信息。GitHub Star/Fork 数量在构建时获取，接口不可用时使用默认值；推送、手动运行或每天的定时构建部署后更新展示。
