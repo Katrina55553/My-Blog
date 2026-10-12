@@ -153,7 +153,7 @@ Umami、统计代理与 HTTPS 证书需在宿主机另行配置。直接运行�
 
 ### GitHub Actions 自动部署
 
-推送到 `main` 后，`.github/workflows/deploy.yml` 会先安装依赖，执行类型检查、构建和产物校验，通过后再 SSH 到服务器部署。
+推送到 `main` 后，`.github/workflows/deploy.yml` 会先安装依赖，执行类型检查、构建和产物校验。通过后，GitHub Actions 将本次提交及其完整历史打包为 Git bundle，通过 SCP 上传并 SSH 到服务器部署，服务器无需连接 GitHub 拉取代码。
 
 工作流还会每天北京时间凌晨 `03:17`（UTC `19:17`）重新构建并部署，以刷新静态页面中的 GitHub Star/Fork 数量，无需推送新提交。推送和手动运行也会立即触发构建和部署。
 
@@ -169,7 +169,7 @@ Umami、统计代理与 HTTPS 证书需在宿主机另行配置。直接运行�
 
 服务器需提前将仓库克隆到 `~/My-Blog`，安装 Docker Compose 和 Nginx，准备好域名、证书及统计服务。部署用户需具备 Docker 权限及安装 Nginx 配置、校验和重载服务所需的免密 sudo 权限。
 
-部署时同步 `origin/main`，在旧容器继续服务期间构建新镜像，构建成功后替换容器；随后同步 `host-nginx.conf`，校验通过后重载宿主机 Nginx。同一部署组按顺序运行。
+部署时从上传的 Git bundle 获取代码，校验提交号与通过构建的 `GITHUB_SHA` 一致，再同步服务器的 `origin/main` 与工作区。旧容器继续服务期间构建新镜像，构建成功后替换容器；随后同步 `host-nginx.conf`，校验通过后重载宿主机 Nginx。临时 bundle 在部署结束时清理，同一部署组按顺序运行。
 
 ## 配置与定制
 

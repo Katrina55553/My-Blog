@@ -127,11 +127,12 @@ description: 文章摘要
 
 ### GitHub Actions 部署流程
 
-push main → 校验与构建 → SSH 到服务器 → `git reset --hard origin/main` → 保留旧容器完成 `docker compose build --no-cache` → `up -d` 替换
+push main → 校验与构建 → Actions 打包完整 Git bundle 并 SCP 到服务器 → SSH 从 bundle 获取代码并校验 `GITHUB_SHA` → 同步 `origin/main` 与工作区 → 保留旧容器完成 `docker compose build --no-cache` → `up -d` 替换
 
 - 服务器路径：`~/My-Blog`，容器仅映射 `127.0.0.1:8080`
 - Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_SSH_KEY`
-- workflow 使用 `deploy-production` concurrency 组，连续推送会取消旧部署
+- 服务器部署时无需访问 GitHub；临时 bundle 在部署结束时清理
+- workflow 使用 `deploy-production` concurrency 组，同组部署按顺序运行
 
 ## 工作流
 

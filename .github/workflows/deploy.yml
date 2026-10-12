@@ -33,6 +33,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          # A complete bundle lets the server fetch without reaching GitHub.
+          fetch-depth: 0
       - name: Deploy to server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
@@ -40,24 +44,38 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
           set -euo pipefail
+          source_bundle="$RUNNER_TEMP/my-blog.bundle"
+          remote_bundle="/tmp/my-blog-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.bundle"
+          git bundle create "$source_bundle" HEAD
+          git bundle verify "$source_bundle"
+
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
-          ssh -o StrictHostKeyChecking=no \
-              -o ServerAliveInterval=60 \
-              -o ServerAliveCountMax=20 \
-              "$SERVER_USER@$SERVER_HOST" '
+          ssh_options=(
+            -o StrictHostKeyChecking=yes
+            -o ConnectTimeout=15
+            -o ServerAliveInterval=60
+            -o ServerAliveCountMax=20
+          )
+          scp "${ssh_options[@]}" "$source_bundle" "$SERVER_USER@$SERVER_HOST:$remote_bundle"
+          ssh "${ssh_options[@]}" "$SERVER_USER@$SERVER_HOST" \
+              "bash -s -- '$remote_bundle' '$GITHUB_SHA'" <<'DEPLOY'
             set -euo pipefail
+            source_bundle=$1
+            expected_commit=$2
+            trap 'rm -f "$source_bundle"' EXIT
             cd ~/My-Blog
-            fetch_ok=0
-            for i in 1 2 3 4 5; do
-              if git fetch origin; then fetch_ok=1; break; fi
-              echo "git fetch failed (attempt $i), retrying in 5s..."
-              sleep 5
-            done
-            [ "$fetch_ok" = 1 ] || { echo "git fetch failed after 5 attempts"; exit 1; }
-            git reset --hard origin/main
+            git bundle verify "$source_bundle"
+            git fetch --no-tags "$source_bundle" HEAD
+            actual_commit=$(git rev-parse FETCH_HEAD)
+            if [ "$actual_commit" != "$expected_commit" ]; then
+              echo "Deployment commit mismatch: expected $expected_commit, got $actual_commit"
+              exit 1
+            fi
+            git update-ref refs/remotes/origin/main "$expected_commit"
+            git reset --hard "$expected_commit"
             git log --oneline -1
             sudo -n true
             docker compose build --no-cache
@@ -90,4 +108,4 @@ jobs:
             fi
             sudo -n systemctl reload nginx
             rm -f "$nginx_backup"
-          '
+          DEPLOY
