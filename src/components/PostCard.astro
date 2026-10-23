@@ -24,7 +24,6 @@ const formattedDate = date.toLocaleDateString('en-US', {
   class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8"
   style={`animation-delay: ${animationDelay}ms`}
   data-slug={searchable ? post.slug : undefined}
-  data-search={searchable ? JSON.stringify([title, ...tags, description]) : undefined}
 >
   <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
     <span
@@ -38,13 +37,14 @@ const formattedDate = date.toLocaleDateString('en-US', {
   <h3 class="font-display font-semibold text-ink text-2xl md:text-3xl tracking-tight mb-2 pl-11">
     <a
       href={`/posts/${post.slug}/`}
+      data-post-title={searchable ? '' : undefined}
       class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]"
     >
       {title}
     </a>
   </h3>
-  <p class="font-newsreader text-ink-2 leading-relaxed pl-11 mb-3">{description}</p>
-  <div class="flex flex-wrap gap-x-4 gap-y-1 pl-11">
+  <p class="font-newsreader text-ink-2 leading-relaxed pl-11 mb-3" data-post-description={searchable ? '' : undefined}>{description}</p>
+  <div class="flex flex-wrap gap-x-4 gap-y-1 pl-11" data-post-tags={searchable ? '' : undefined}>
     {tags.map((tag) => (
       <a
         href={`/tags/${tag}/`}

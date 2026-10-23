@@ -8,13 +8,13 @@
 ## 特性
 
 - **Ink & Vellum / Ink & Midnight 双主题**：暖羊皮纸亮色与暖午夜暗色，支持系统偏好、本地持久化和跨标签页同步。
-- **阅读排版**：自托管 Fraunces、Newsreader、Noto Serif SC 等字体，搭配朱砂红点缀与细线分隔；列表在桌面端使用双栏布局。
+- **阅读排版**：自托管 Fraunces、Newsreader、Noto Serif SC 等字体；中文字库按 `unicode-range` 分片加载，保留 400/600 字重；列表在桌面端使用双栏布局。
 - **内容导航**：文章按日期降序排列，首页每页 6 篇；支持标签总览、标签筛选和按年份归档的搜索页。
-- **客户端搜索**：实时匹配标题、标签和摘要，搜索结果分页，关键词与页码保存在 URL 中。
+- **客户端搜索**：静态首屏仅 6 篇，通过元数据索引匹配标题、标签和摘要，按页创建卡片；关键词与页码保存在 URL 中，支持前进后退和无 JavaScript 浏览入口。
 - **Markdown 增强**：Shiki 代码高亮与一键复制、KaTeX 数学公式、按需加载并随主题切换重绘的 Mermaid 图表。
-- **文章阅读**：可折叠目录侧栏与滚动高亮、预计阅读时间、上一篇/下一篇导航。
+- **文章阅读**：桌面可折叠目录侧栏、移动端浮动折叠目录与滚动高亮、预计阅读时间、上一篇/下一篇导航。
 - **图片优化**：Markdown 本地图片由 Astro 生成优化资源、响应式 `srcset` 和尺寸信息。
-- **统计与分享**：Umami 阅读量统计（30 分钟本地缓存）、构建时获取 GitHub Star/Fork 数量、Open Graph / Twitter Card / JSON-LD / Sitemap / 社交分享 PNG。
+- **统计与分享**：Umami 阅读量统计使用共享客户端模块和 30 分钟本地缓存，兼容动态搜索卡片；构建时获取 GitHub Star/Fork 数量，支持 Open Graph / Twitter Card / JSON-LD / Sitemap / 社交分享 PNG。
 - **移动端适配**：响应式排版、纯 CSS 汉堡菜单与主题切换。
 
 ## 技术栈
@@ -44,9 +44,15 @@
 ├── scripts/
 │   ├── import-post.cjs          # 导入 Obsidian 文章与图片
 │   ├── compress-images.cjs      # PNG 图片压缩工具
-│   └── verify-build.cjs         # 构建产物校验
+│   ├── verify-build.cjs         # 构建产物校验
+│   ├── test-import-post.cjs     # 导入 CLI 隔离测试
+│   ├── verify-view-counter.cjs # 阅读量模块行为校验
+│   ├── deploy-health-manifest.cjs # 生成部署资源校验清单
+│   ├── deploy-release.sh       # 镜像切换、HTTP 校验与回滚
+│   └── test-deploy.cjs         # 部署与回滚模拟测试
 ├── astro.config.mjs            # 站点地址、Markdown 插件与图片配置
 ├── Dockerfile                  # Node.js 构建 → Nginx 静态服务
+├── Dockerfile.runtime          # CI 将已验证的 dist 打包为运行镜像
 ├── docker-compose.yml          # 容器编排（127.0.0.1:8080）
 ├── nginx.conf                  # 容器内路由、缓存与 gzip
 ├── host-nginx.conf             # 宿主机 HTTPS 与统计服务反向代理
@@ -62,6 +68,7 @@
     │   ├── TableOfContents.astro # 可折叠文章目录与滚动高亮
     │   └── ViewCounter.astro   # 阅读量统计与缓存
     ├── layouts/BaseLayout.astro # 全局布局、导航、主题与 SEO
+    ├── scripts/                # 共享阅读量模块与搜索客户端
     ├── lib/
     │   ├── github.ts           # 构建时获取仓库统计，失败时使用默认值
     │   └── pagination.ts       # 每页篇数与分页规则
@@ -96,10 +103,13 @@ npm run dev
 | `npx astro check` | 检查 Astro / TypeScript 诊断与内容 schema |
 | `npm run build` | 构建静态站点到 `dist/` |
 | `npm run preview` | 本地预览已生成的 `dist/` |
-| `npm run verify` | 类型检查、生产构建与构建产物校验 |
+| `npm run verify` | 导入/阅读量行为校验、类型检查、生产构建与构建产物校验 |
+| `npm run verify:deploy` | 使用模拟命令验证真实 Bash 部署脚本，不连接服务器 |
 | `npm run import -- "path/to/article.md"` | 导入 Obsidian Markdown 文章 |
 
-提交前运行 `npm run verify`，会检查生成路由、404 页面、社交分享图片、图片优化、字体资源与 CSS 体积等。
+提交前运行 `npm run verify`，会检查导入保护、共享阅读量缓存、生成路由、404 页面、社交分享图片、图片优化与资源预算。预算包括 CSS 原始体积 320 KiB、gzip 后 112 KiB、每个中文字体分片 64 KiB，以及搜索 HTML 48 KiB。字符范围声明增加 CSS 体积，使浏览器可以只下载所需中文字库分片。
+
+修改部署逻辑时另运行 `npm run verify:deploy`。它需要 Bash；Windows 可通过 `BASH_PATH` 指向 Git Bash。CI 会执行同样的行为校验和部署测试。
 
 ## 添加文章
 
@@ -134,7 +144,14 @@ npm run import -- "path/to/article.md"
 
 导入脚本会根据文件名生成 slug、补齐日期中的月日位数，并将 `![[image.png]]` 或 `![[subdir/image.png]]` 图片嵌入转换为 Markdown 引用。图片复制到 `src/assets/images/`，文件名带内容哈希以避免同名覆盖。
 
-导入后检查或补齐 frontmatter，确认日期、标签与图片引用，并按需将文章文件名改为英文 slug。导入同名文章会覆盖已有文件。运行 `npm run verify` 并在本地预览确认后，再提交并推送到 `main` 分支触发部署。
+默认拒绝覆盖同名文章；明确需要覆盖时添加 `--force`。使用 `--dry-run` 可以查看文章目标和图片复制计划，不写入文件。脚本会先检查重名、缺失图片及图片路径歧义，全部通过后再写入。
+
+```bash
+npm run import -- "path/to/article.md" --dry-run
+npm run import -- "path/to/article.md" --force
+```
+
+导入后检查或补齐 frontmatter，确认日期、标签与图片引用，并按需将文章文件名改为英文 slug。运行 `npm run verify` 并在本地预览确认后，再提交并推送到 `main` 分支触发部署。
 
 ## Docker 部署
 
@@ -154,7 +171,7 @@ Umami、统计代理与 HTTPS 证书需在宿主机另行配置。直接运行�
 
 ### GitHub Actions 自动部署
 
-推送到 `main` 后，`.github/workflows/deploy.yml` 会先安装依赖，执行类型检查、构建和产物校验。通过后，GitHub Actions 将本次提交及其完整历史打包为 Git bundle，通过 SCP 上传并 SSH 到服务器部署，服务器无需连接 GitHub 拉取代码。
+推送到 `main` 后，`.github/workflows/deploy.yml` 会先安装依赖，执行行为校验、类型检查、构建、产物校验和部署回滚测试。通过后，用 `Dockerfile.runtime` 将同一份 `dist/` 打包为带提交号标签的镜像，并生成关键页面和资源的 SHA-256 校验清单。部署任务下载镜像产物，与完整 Git bundle 一起 SCP 到服务器；服务器直接加载镜像，无需连接 GitHub、安装 npm 依赖或重新构建站点。
 
 工作流还会每天北京时间凌晨 `03:17`（UTC `19:17`）重新构建并部署，以刷新静态页面中的 GitHub Star/Fork 数量，无需推送新提交。推送和手动运行也会立即触发构建和部署。
 
@@ -168,9 +185,11 @@ Umami、统计代理与 HTTPS 证书需在宿主机另行配置。直接运行�
 | `SERVER_USER` | SSH 登录用户 |
 | `SERVER_SSH_KEY` | SSH 私钥 |
 
-服务器需提前将仓库克隆到 `~/My-Blog`，安装 Docker Compose 和 Nginx，准备好域名、证书及统计服务。部署用户需具备 Docker 权限及安装 Nginx 配置、校验和重载服务所需的免密 sudo 权限。
+服务器需提前将仓库克隆到 `~/My-Blog`，安装 Docker Compose、Nginx、curl 和 sha256sum，准备好域名、证书及统计服务。部署用户需具备 Docker 权限及备份、安装 Nginx 配置、校验和重载服务所需的免密 sudo 权限。
 
-部署时从上传的 Git bundle 获取代码，校验提交号与通过构建的 `GITHUB_SHA` 一致，再同步服务器的 `origin/main` 与工作区。旧容器继续服务期间构建新镜像，构建成功后替换容器；随后同步 `host-nginx.conf`，校验通过后重载宿主机 Nginx。临时 bundle 在部署结束时清理，同一部署组按顺序运行。
+部署时核对 Git bundle 和镜像标签中的提交号，再同步服务器的 `origin/main` 与工作区。先在临时回环端口启动候选镜像，逐项校验首页、搜索、标签、文章及其资源内容；通过后替换博客容器，同步并验证宿主机 Nginx，再通过本机 HTTPS 校验完整反向代理链路。容器启动、页面内容、Nginx 校验或 HTTPS 检查失败时，恢复上一镜像、Nginx 配置及原工作区提交。首次部署没有旧镜像时，失败会移除新服务。
+
+服务使用稳定的 `my-blog:current` 镜像标签，上一镜像保留为 `my-blog:previous`；部署结束清理本次传输标签和临时文件，不执行全局镜像清理。同一部署组按顺序运行。本地仍使用 `docker compose up -d --build` 进行常规源码构建。
 
 ## 配置与定制
 
@@ -179,10 +198,10 @@ Umami、统计代理与 HTTPS 证书需在宿主机另行配置。直接运行�
 | 站点域名、尾斜杠、Markdown 与图片处理 | `astro.config.mjs` |
 | 品牌、导航、SEO、Umami 脚本与备案信息 | `src/layouts/BaseLayout.astro` |
 | 首页文案与文章页作者信息 | `src/pages/index.astro`、`src/pages/posts/[...slug].astro` |
-| 字体、配色与双主题样式 | `src/styles/global.css` |
+| 字体、配色与双主题样式 | `src/styles/global.css`、`src/layouts/BaseLayout.astro` |
 | 每页文章数（当前为 6） | `src/lib/pagination.ts` |
 | GitHub 仓库统计地址与默认值 | `src/lib/github.ts` |
-| 阅读量 website ID | `src/components/ViewCounter.astro` |
+| 阅读量 website ID | `src/scripts/view-counter.ts` |
 | 社交分享图片内容 | `src/pages/og-image.png.ts` |
 | 域名、证书、统计代理地址与 website ID | `host-nginx.conf` |
 

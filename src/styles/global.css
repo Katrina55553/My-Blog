@@ -11,20 +11,7 @@
   font-weight: 400;
   src: url("@fontsource/dancing-script/files/dancing-script-latin-400-normal.woff2") format("woff2");
 }
-@font-face {
-  font-family: "Noto Serif SC";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 400;
-  src: url("@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-400-normal.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Noto Serif SC";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 600;
-  src: url("@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-600-normal.woff2") format("woff2");
-}
+/* Noto Serif SC is imported by BaseLayout with unicode-range slices. */
 @plugin "@tailwindcss/typography";
 
 /* =========================================================

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "verify": "astro check && astro build && node scripts/verify-build.cjs",
+    "verify": "node scripts/test-import-post.cjs && node scripts/verify-view-counter.cjs && astro check && astro build && node scripts/verify-build.cjs",
+    "verify:deploy": "node --test scripts/test-deploy.cjs",
     "preview": "astro preview",
     "astro": "astro",
     "import": "node scripts/import-post.cjs"

@@ -7,14 +7,21 @@ import { POSTS_PER_PAGE } from '../lib/pagination';
 
 const posts = await getCollection('posts');
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const initialPosts = sorted.slice(0, POSTS_PER_PAGE);
+const yearCounts = new Map<number, number>();
+for (const post of sorted) {
+  const year = post.data.date.getUTCFullYear();
+  yearCounts.set(year, (yearCounts.get(year) ?? 0) + 1);
+}
 
 const grouped = new Map<number, typeof sorted>();
-for (const post of sorted) {
+for (const post of initialPosts) {
   const year = post.data.date.getUTCFullYear();
   if (!grouped.has(year)) grouped.set(year, []);
   grouped.get(year)!.push(post);
 }
-
+// Keep one inert card as the client template, including a tag link to clone.
+const templatePost = sorted[0] && { ...sorted[0], data: { ...sorted[0].data, tags: [''] } };
 ---
 
 <BaseLayout title="搜索" description="搜索和浏览全部文章" wide="listing">
@@ -34,6 +41,8 @@ for (const post of sorted) {
       <input
         type="text"
         id="archive-search"
+        aria-label="搜索文章"
+        aria-controls="archive-list"
         placeholder="搜索文章……"
         class="w-full bg-paper-2/60 border border-rule hover:border-rule-2 rounded-none pl-11 pr-4 sm:pr-40 py-3 text-base text-ink placeholder-ink-4
                focus:outline-none focus:border-vermilion focus:bg-paper-2 transition-colors"
@@ -41,8 +50,13 @@ for (const post of sorted) {
         disabled
         aria-busy="true"
       />
-      <span class="absolute right-4 top-1/2 -translate-y-1/2 label-caps text-ink-4 pointer-events-none hidden sm:block" id="result-count"></span>
+      <span class="sr-only sm:not-sr-only sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2 label-caps text-ink-4 pointer-events-none" id="result-count" role="status" aria-live="polite"></span>
     </div>
+
+    <noscript>
+      <p class="font-newsreader text-ink-3 mb-8">搜索需要 JavaScript。浏览更多文章请前往 <a href="/">文章列表</a> 或 <a href="/tags/">标签归档</a>。</p>
+    </noscript>
+    <p id="search-load-error" class="font-newsreader text-ink-3 mb-8" role="status" hidden>搜索暂时无法加载，请刷新重试，或前往 <a href="/">文章列表</a>、<a href="/tags/">标签归档</a> 继续浏览。</p>
 
     <!-- Archive list -->
     <div id="archive-list" class="space-y-12 scroll-mt-24">
@@ -51,16 +65,21 @@ for (const post of sorted) {
           <div class="flex items-baseline gap-4 mb-5">
             <h2 class="font-display font-semibold text-ink text-3xl tracking-tight">{year}</h2>
             <span class="h-px flex-1 bg-rule"></span>
-            <span class="label-caps text-ink-4" data-year-count>{yearPosts.length} 篇文章</span>
+            <span class="label-caps text-ink-4" data-year-count>{yearCounts.get(year)} 篇文章</span>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
-            {yearPosts.map((post, i) => (
-              <PostCard {post} number={i + 1} animationDelay={Math.min(i, 5) * 90} searchable />
+            {yearPosts.map((post) => (
+              <PostCard {post} number={initialPosts.indexOf(post) + 1} animationDelay={initialPosts.indexOf(post) * 90} searchable />
             ))}
           </div>
         </div>
       ))}
     </div>
+    {templatePost && (
+      <template id="search-card-template">
+        <PostCard post={templatePost} number={1} animationDelay={0} searchable />
+      </template>
+    )}
     <p id="search-empty" class="font-newsreader text-ink-3 italic" role="status" hidden>没有找到匹配的文章。</p>
     <Pagination id="search-pagination" current={1} total={Math.ceil(sorted.length / POSTS_PER_PAGE)} base="search/" client />
   </section>
@@ -74,87 +93,5 @@ for (const post of sorted) {
 </style>
 
 <script>
-  import { POSTS_PER_PAGE } from '../lib/pagination';
-
-  const input = document.getElementById('archive-search') as HTMLInputElement;
-  const list = document.getElementById('archive-list')!;
-  const count = document.getElementById('result-count')!;
-  const empty = document.getElementById('search-empty')!;
-  const pagination = document.getElementById('search-pagination')!;
-  const articles = Array.from(list.querySelectorAll<HTMLElement>('article[data-slug]'));
-  const yearGroups = Array.from(list.querySelectorAll<HTMLElement>('[data-year]'));
-  const posts = articles.map((article) => ({
-    article,
-    fields: (JSON.parse(article.dataset.search!) as string[]).map((field) => field.toLowerCase()),
-    year: article.closest<HTMLElement>('[data-year]')!.dataset.year!,
-  }));
-  let currentPage = 1;
-
-  function readLocation() {
-    const params = new URLSearchParams(window.location.search);
-    input.value = params.get('q') || '';
-    const page = Number(params.get('page') || '1');
-    currentPage = Number.isSafeInteger(page) && page > 0 ? page : 1;
-  }
-
-  function updateLocation(mode: 'push' | 'replace') {
-    const url = new URL(window.location.href);
-    const query = input.value.trim();
-    if (query) url.searchParams.set('q', query);
-    else url.searchParams.delete('q');
-    if (currentPage > 1) url.searchParams.set('page', String(currentPage));
-    else url.searchParams.delete('page');
-    if (url.href !== window.location.href) {
-      if (mode === 'push') history.pushState(null, '', url);
-      else history.replaceState(null, '', url);
-    }
-  }
-
-  function render(mode: 'push' | 'replace' = 'replace') {
-    const query = input.value.trim().toLowerCase();
-    const matches = query ? posts.filter((post) => post.fields.some((field) => field.includes(query))) : posts;
-    const totalPages = Math.ceil(matches.length / POSTS_PER_PAGE);
-    currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
-    const start = (currentPage - 1) * POSTS_PER_PAGE;
-    const pagePosts = matches.slice(start, start + POSTS_PER_PAGE);
-    const visible = new Set(pagePosts.map((post) => post.article));
-    articles.forEach((article) => { article.hidden = !visible.has(article); });
-    pagePosts.forEach((post, index) => {
-      post.article.querySelector('[data-entry-number]')!.textContent = String(start + index + 1).padStart(2, '0');
-    });
-
-    const yearCounts = new Map<string, number>();
-    matches.forEach((post) => yearCounts.set(post.year, (yearCounts.get(post.year) || 0) + 1));
-    const visibleYears = new Set(pagePosts.map((post) => post.year));
-    yearGroups.forEach((group) => {
-      group.hidden = !visibleYears.has(group.dataset.year!);
-      group.querySelector('[data-year-count]')!.textContent = `${yearCounts.get(group.dataset.year!) || 0} 篇文章`;
-    });
-
-    count.textContent = query ? `找到 ${matches.length} 篇` : '';
-    empty.hidden = matches.length > 0;
-    updateLocation(mode);
-    pagination.dispatchEvent(new CustomEvent('pagination:update', { detail: { current: currentPage, total: totalPages } }));
-  }
-
-  await customElements.whenDefined('blog-pagination');
-  input.addEventListener('input', () => {
-    currentPage = 1;
-    render();
-  });
-  pagination.addEventListener('pagination:change', (event) => {
-    const page = (event as CustomEvent<{ page: number }>).detail.page;
-    if (page === currentPage) return;
-    currentPage = page;
-    render('push');
-    list.scrollIntoView({ block: 'start' });
-  });
-  window.addEventListener('popstate', () => {
-    readLocation();
-    render();
-  });
-  readLocation();
-  render();
-  input.disabled = false;
-  input.setAttribute('aria-busy', 'false');
+  import '../scripts/archive-search';
 </script>

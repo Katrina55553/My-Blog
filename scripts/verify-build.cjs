@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { gzipSync } = require('node:zlib');
 
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
@@ -51,10 +52,21 @@ assert(!allHtml.includes('cdn.jsdelivr.net/npm/mermaid'), 'Mermaid still uses js
 const legacyWoff = assetFiles.filter((file) => path.extname(file) === '.woff');
 assert.deepEqual(legacyWoff, [], 'legacy .woff assets were emitted');
 
-const cssBytes = assetFiles
-  .filter((file) => file.endsWith('.css'))
-  .reduce((sum, file) => sum + fs.statSync(file).size, 0);
-assert(cssBytes < 120 * 1024, `CSS budget exceeded: ${cssBytes} bytes`);
+const cssFiles = assetFiles.filter((file) => file.endsWith('.css'));
+const cssSources = cssFiles.map((file) => fs.readFileSync(file));
+const cssBytes = cssSources.reduce((sum, source) => sum + source.length, 0);
+const cssGzipBytes = cssSources.reduce((sum, source) => sum + gzipSync(source).length, 0);
+// unicode-range declarations increase CSS size but let browsers fetch only the
+// Chinese font slices needed by a page, instead of two 1.5 MB font files.
+assert(cssBytes < 320 * 1024, `CSS budget exceeded: ${cssBytes} bytes`);
+assert(cssGzipBytes < 112 * 1024, `Compressed CSS budget exceeded: ${cssGzipBytes} bytes`);
+const chineseFonts = assetFiles.filter((file) => path.basename(file).startsWith('noto-serif-sc-'));
+assert(chineseFonts.length > 0, 'Chinese font slices were not emitted');
+assert(cssSources.some((source) => source.toString().includes('unicode-range:')), 'font unicode ranges were lost');
+for (const file of chineseFonts) {
+  assert(file.endsWith('.woff2'), `unexpected Chinese font format: ${file}`);
+  assert(fs.statSync(file).size < 64 * 1024, `Chinese font slice exceeds 64 KiB: ${file}`);
+}
 
 const imageArticle = fs.readFileSync(
   path.join(dist, 'posts', 'os-core-concepts-notes', 'index.html'),
@@ -67,6 +79,19 @@ assert(optimizedImage.includes('width=') && optimizedImage.includes('height='), 
 
 const plainArticle = fs.readFileSync(path.join(dist, 'posts', 'avoid-ai-code-chaos', 'index.html'), 'utf8');
 assert(!plainArticle.includes('katex.min.'), 'KaTeX CSS loaded on a non-math article');
+
+const searchHtml = fs.readFileSync(path.join(dist, 'search', 'index.html'), 'utf8');
+const activeSearchHtml = searchHtml.replace(/<template\b[^>]*>[\s\S]*?<\/template>/gi, '');
+const searchIndex = JSON.parse(fs.readFileSync(path.join(dist, 'search.json'), 'utf8'));
+assert.equal((activeSearchHtml.match(/<article\b/g) || []).length, Math.min(6, searchIndex.length), 'search must render only the first page of cards');
+assert(Buffer.byteLength(searchHtml) < 48 * 1024, 'search HTML exceeds 48 KiB; check repeated scripts/cards');
+for (const file of htmlFiles) {
+  const html = fs.readFileSync(file, 'utf8');
+  // Astro may inline this small shared module once; it must never repeat per card.
+  assert((html.match(/__vc_data/g) || []).length <= 1, `view-counter code was duplicated into ${file}`);
+}
+assert(searchIndex.every((post) => typeof post.date === 'string' && Number.isFinite(Date.parse(post.date))), 'search index dates are missing or invalid');
+assert(plainArticle.includes('id="toc-mobile"'), 'article has no mobile directory');
 
 for (const match of allHtml.matchAll(/href="(\/posts\/[^"#?]+)"/g)) {
   assert(match[1].endsWith('/'), `non-canonical post URL found: ${match[1]}`);
@@ -81,4 +106,4 @@ assert(
   'numbered sitemap was not built',
 );
 
-console.log(`Build verification passed: ${htmlFiles.length} HTML files, ${cssBytes} CSS bytes.`);
+console.log(`Build verification passed: ${htmlFiles.length} HTML files, ${cssBytes} CSS bytes (${cssGzipBytes} gzip), ${chineseFonts.length} Chinese font slices.`);

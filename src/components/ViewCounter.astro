@@ -1,64 +1,13 @@
 ---
+interface Props {
+  slug: string;
+}
+
 const { slug } = Astro.props;
-const websiteId = 'ceead9d3-35d9-4590-8678-d153328378a6';
 ---
 
-<span id={`vc-${slug}`} class="label-caps text-ink-4">
-  &mdash;
-</span>
-<script define:vars={{ slug, websiteId }}>
-  (() => {
-    const el = document.getElementById(`vc-${slug}`);
-    if (!el) return;
-    const pageUrls = [`/posts/${slug}`, `/posts/${slug}/`];
-    const CACHE_KEY = '__vc_data';
-    const TTL = 30 * 60 * 1000; // 30 minutes
+<blog-view-counter data-slug={slug} class="label-caps text-ink-4">&mdash;</blog-view-counter>
 
-    function display(entry) {
-      if (!entry || typeof entry.y !== 'number' || entry.y <= 0) { el.remove(); return; }
-      el.textContent = `${entry.y} 次阅读`;
-    }
-
-    function findEntry(data) {
-      const matches = data.filter((item) => pageUrls.includes(item.x) && typeof item.y === 'number');
-      if (matches.length === 0) return null;
-      return { x: pageUrls[1], y: matches.reduce((sum, item) => sum + item.y, 0) };
-    }
-
-    function fetchAndCache() {
-      const now = Date.now();
-      return fetch(`/api/views/websites/${websiteId}/metrics?startAt=0&endAt=${now}&type=url`)
-        .then((r) => { if (!r.ok) throw new Error('bad status'); return r.json(); })
-        .then((data) => {
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: now })); } catch (e) { /* quota exceeded, ignore */ }
-          return data;
-        });
-    }
-
-    function loadCache() {
-      try {
-        const raw = localStorage.getItem(CACHE_KEY);
-        if (!raw) return null;
-        const cached = JSON.parse(raw);
-        if (cached.data && cached.ts && (Date.now() - cached.ts) < TTL) return cached.data;
-      } catch (e) { /* corrupted, ignore */ }
-      return null;
-    }
-
-    const cached = loadCache();
-    if (cached) {
-      display(findEntry(cached));
-      return;
-    }
-
-    // One fetch shared by all ViewCounter instances on the page
-    const memKey = '__vc_p_' + websiteId;
-    if (!window[memKey]) {
-      window[memKey] = fetchAndCache().catch(() => []);
-    }
-
-    window[memKey].then((data) => {
-      display(findEntry(data));
-    });
-  })();
+<script>
+  import '../scripts/view-counter';
 </script>

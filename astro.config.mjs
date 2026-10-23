@@ -19,6 +19,18 @@ const katexWoff2Only = {
   },
 };
 
+/** @type {import('vite').Plugin} */
+const fontsourceWoff2Only = {
+  name: 'fontsource-woff2-only',
+  enforce: 'pre',
+  transform(code, id) {
+    const normalizedId = id.replaceAll('\\', '/');
+    if (!normalizedId.includes('/@fontsource/noto-serif-sc/') || !normalizedId.endsWith('.css')) return null;
+    // Keep Fontsource's unicode-range declarations while omitting legacy files.
+    return code.replace(/,\s*url\([^)]*\.woff\)\s*format\([^)]*\)/g, '');
+  },
+};
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://blog.cogod.cn',
@@ -79,6 +91,6 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [katexWoff2Only, tailwindcss()],
+    plugins: [katexWoff2Only, fontsourceWoff2Only, tailwindcss()],
   },
 });

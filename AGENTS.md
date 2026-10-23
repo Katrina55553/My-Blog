@@ -11,6 +11,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev          # 开发服务器 http://localhost:4321
 npm run build        # 生产构建
+npm run verify       # 导入/阅读量行为校验 + 类型检查 + 构建 + 产物校验
+npm run verify:deploy # Bash 部署及回滚模拟测试（不连接服务器）
 npm run preview      # 预览构建结果
 npm run import       # 导入文章: npm run import "path/to/article.md"
 npx astro check      # TypeScript 类型检查
@@ -18,10 +20,14 @@ npx astro check      # TypeScript 类型检查
 
 ### 验证流程
 
-本项目无单元测试框架。验证依赖两步：
+本项目无额外单元测试框架。提交前运行 `npm run verify`，包含：
 
-1. `npx astro check` — TypeScript 类型检查
-2. `npm run build` — 保证站点可成功构建
+1. 导入 CLI 的隔离测试与共享阅读量模块行为校验
+2. `npx astro check` — TypeScript 类型检查
+3. `npm run build` — 保证站点可成功构建
+4. `node scripts/verify-build.cjs` — 路由、图片、字体分片、搜索首屏与资源预算
+
+修改部署逻辑时另运行 `npm run verify:deploy`，使用真实 Bash 脚本和模拟 Docker/HTTP 命令验证成功和失败回滚。Windows 可用 `BASH_PATH` 指定 Git Bash。CI 会执行以上校验。
 
 ## 技术栈要点
 
@@ -64,19 +70,19 @@ src/
 │   ├── Pagination.astro       # 分页导航（首页 + 分页页共用）
 │   ├── PrevNext.astro         # 文章底部上一篇/下一篇
 │   ├── TableOfContents.astro  # 文章目录
-│   └── ViewCounter.astro      # 阅读量（兼容历史有/无尾斜杠 URL）
+│   └── ViewCounter.astro      # 阅读量自定义元素（逻辑在 scripts/view-counter.ts）
+├── scripts/                  # 共享阅读量与按页创建卡片的搜索客户端
 ├── layouts/
 │   └── BaseLayout.astro       # 全局布局（暗色主题、响应式导航、SEO meta）
 ├── pages/
-│   ├── index.astro            # 首页（文章卡片，5 篇/页，按日期降序）
+│   ├── index.astro            # 首页（文章卡片，6 篇/页，按日期降序）
 │   ├── page/[page].astro      # 分页（getStaticPaths 自动生成）
 │   ├── posts/
 │   │   └── [...slug].astro    # 文章详情（LaTeX、代码复制、阅读时间、PrevNext）
 │   ├── tags/
 │   │   ├── index.astro        # 标签总览（计数，按频次降序）
 │   │   └── [tag].astro        # 标签筛选（getStaticPaths 预生成）
-│   ├── search.astro           # 归档 + 客户端搜索
-│   ├── popular.astro          # 阅读量排行
+│   ├── search.astro           # 首屏 6 篇 + 元数据索引搜索与按页渲染
 │   ├── 404.astro              # 404 页面
 │   ├── robots.txt.ts          # robots.txt
 │   ├── search.json.ts         # 搜索索引 API
@@ -96,6 +102,8 @@ astro.config.mjs               # Shiki + remark-math + rehype-katex-slug + Merma
 - 内联代码样式（蓝色高亮）
 - 字体栈：衬线 `Georgia, "Noto Serif SC", serif`；等宽 `"JetBrains Mono", "Fira Code", "Cascadia Code", monospace`
 
+`BaseLayout.astro` 导入 Noto Serif SC 的 400/600 字重分片 CSS，以 `unicode-range` 按需下载字符文件；Vite 插件移除旧 WOFF 引用，仅输出 WOFF2。构建校验限制单个中文字体分片小于 64 KiB、CSS 原始总量小于 320 KiB/gzip 后小于 112 KiB、搜索 HTML 小于 48 KiB。
+
 ## 文章 Frontmatter
 
 ```yaml
@@ -114,6 +122,8 @@ description: 文章摘要
 - **阶段 1**：`node:22-alpine` → `npm ci` → `npm run build`，产出 `/app/dist`
 - **阶段 2**：`nginx:alpine` → 复制 `dist` 与静态 `nginx.conf`
 
+上述 `Dockerfile` 用于本地源码构建。生产 CI 使用 `Dockerfile.runtime` 将已经验证的同一份 `dist/` 和 `nginx.conf` 打包成镜像，服务器只加载镜像。
+
 ### Nginx 路由规则
 
 | 路径 | 缓存策略 |
@@ -127,12 +137,14 @@ description: 文章摘要
 
 ### GitHub Actions 部署流程
 
-push main → 校验与构建 → Actions 打包完整 Git bundle 并 SCP 到服务器 → SSH 从 bundle 获取代码并校验 `GITHUB_SHA` → 同步 `origin/main` 与工作区 → 保留旧容器完成 `docker compose build --no-cache` → `up -d` 替换
+push main → 行为校验、类型检查、构建与产物校验 → 部署回滚模拟测试 → 将精确 dist 打包成镜像并生成 SHA-256 健康清单 → 镜像产物与完整 Git bundle 经 SCP 到服务器 → 核对 bundle/镜像提交号 → 临时端口预检 → 替换容器并验证内容 → 同步 Nginx 并验证本机 HTTPS
 
 - 服务器路径：`~/My-Blog`，容器仅映射 `127.0.0.1:8080`
 - Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_SSH_KEY`
-- 服务器部署时无需访问 GitHub；临时 bundle 在部署结束时清理
+- 服务器部署时无需访问 GitHub、安装 npm 依赖或重新构建；部署结束清理临时传输文件
 - workflow 使用 `deploy-production` concurrency 组，同组部署按顺序运行
+- `scripts/deploy-release.sh` 保存旧镜像并验证关键页面及直接资源的实际内容；切换后失败会恢复旧镜像和 Nginx 配置，外层部署脚本恢复原工作区提交
+- Compose 使用 `my-blog:current`，上一镜像保留为 `my-blog:previous`；服务器切换与回滚均禁止 build/pull
 
 ## 工作流
 
@@ -149,3 +161,5 @@ push main → 校验与构建 → Actions 打包完整 Git bundle 并 SCP 到服
 - 从文件名自动生成 slug
 - 修正日期格式：`2026-5-14` → `2026-05-14`
 - 转换 `![[image.png]]` 为 `src/assets/images/` 相对引用；文件名包含内容哈希，避免不同目录的同名图片互相覆盖
+- 默认禁止覆盖已有文章，显式 `--force` 才覆盖；`--dry-run` 查看计划且不写入
+- 所有图片和目标文件先预检，缺图、路径歧义或冲突时不写文章也不复制图片

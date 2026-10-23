@@ -15,6 +15,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      release_artifact: ${{ steps.package.outputs.artifact_name }}
+      image: ${{ steps.package.outputs.image }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,12 +25,41 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Check import safety and shared view-counter lifecycle
+        run: node scripts/test-import-post.cjs && node scripts/verify-view-counter.cjs
       - name: Type check (incl. content schema validation)
         run: npx astro check
       - name: Build (fails on invalid frontmatter/schema)
         run: npm run build
       - name: Verify generated routes and asset budgets
         run: node scripts/verify-build.cjs
+      - name: Test deployment health checks and rollback
+        run: node --test scripts/test-deploy.cjs
+      - name: Package the verified output as a runtime image
+        id: package
+        run: |
+          set -euo pipefail
+          release_dir="$RUNNER_TEMP/release"
+          context_dir=$(mktemp -d)
+          mkdir -p "$release_dir"
+          node scripts/deploy-health-manifest.cjs dist "$release_dir/health.tsv"
+          cp -a dist "$context_dir/dist"
+          cp nginx.conf "$context_dir/nginx.conf"
+          image="my-blog:${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          docker build -f Dockerfile.runtime \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --tag "$image" "$context_dir"
+          docker save "$image" | gzip > "$release_dir/image.tar.gz"
+          printf '%s\n' "$image" > "$release_dir/image.txt"
+          printf '%s\n' "$GITHUB_SHA" > "$release_dir/commit.txt"
+          printf 'artifact_name=release-%s-%s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"
+          printf 'image=%s\n' "$image" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}
+          path: ${{ runner.temp }}/release/
+          retention-days: 2
+          if-no-files-found: error
 
   deploy:
     needs: build
@@ -37,15 +69,24 @@ jobs:
         with:
           # A complete bundle lets the server fetch without reaching GitHub.
           fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.release_artifact }}
+          path: ${{ runner.temp }}/release
       - name: Deploy to server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          EXPECTED_IMAGE: ${{ needs.build.outputs.image }}
         run: |
           set -euo pipefail
           source_bundle="$RUNNER_TEMP/my-blog.bundle"
-          remote_bundle="/tmp/my-blog-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.bundle"
+          release_dir="$RUNNER_TEMP/release"
+          remote_dir="/tmp/my-blog-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          image=$(cat "$release_dir/image.txt")
+          test "$(cat "$release_dir/commit.txt")" = "$GITHUB_SHA"
+          test "$image" = "$EXPECTED_IMAGE"
           git bundle create "$source_bundle" HEAD
           git bundle verify "$source_bundle"
 
@@ -59,14 +100,36 @@ jobs:
             -o ServerAliveInterval=60
             -o ServerAliveCountMax=20
           )
-          scp "${ssh_options[@]}" "$source_bundle" "$SERVER_USER@$SERVER_HOST:$remote_bundle"
+          cleanup_remote() {
+            ssh "${ssh_options[@]}" "$SERVER_USER@$SERVER_HOST" \
+              "rm -f '$remote_dir/my-blog.bundle' '$remote_dir/image.tar.gz' '$remote_dir/health.tsv'; rmdir '$remote_dir' 2>/dev/null || true" || true
+          }
+          trap cleanup_remote EXIT
+          ssh "${ssh_options[@]}" "$SERVER_USER@$SERVER_HOST" "mkdir -m 0700 '$remote_dir'"
+          scp "${ssh_options[@]}" "$source_bundle" "$release_dir/image.tar.gz" "$release_dir/health.tsv" \
+            "$SERVER_USER@$SERVER_HOST:$remote_dir/"
           ssh "${ssh_options[@]}" "$SERVER_USER@$SERVER_HOST" \
-              "bash -s -- '$remote_bundle' '$GITHUB_SHA'" <<'DEPLOY'
+              "bash -s -- '$remote_dir' '$GITHUB_SHA' '$image'" <<'DEPLOY'
             set -euo pipefail
-            source_bundle=$1
+            release_dir=$1
             expected_commit=$2
-            trap 'rm -f "$source_bundle"' EXIT
+            image=$3
             cd ~/My-Blog
+            previous_commit=$(git rev-parse HEAD)
+            source_changed=0
+            finish() {
+              status=$?
+              trap - EXIT
+              set +e
+              if [ "$status" -ne 0 ] && [ "$source_changed" = 1 ]; then
+                git reset --hard "$previous_commit" || echo "Failed to restore previous source checkout" >&2
+              fi
+              rm -f "$release_dir/my-blog.bundle" "$release_dir/image.tar.gz" "$release_dir/health.tsv"
+              rmdir "$release_dir" 2>/dev/null || true
+              exit "$status"
+            }
+            trap finish EXIT
+            source_bundle="$release_dir/my-blog.bundle"
             git bundle verify "$source_bundle"
             git fetch --no-tags "$source_bundle" HEAD
             actual_commit=$(git rev-parse FETCH_HEAD)
@@ -75,37 +138,9 @@ jobs:
               exit 1
             fi
             git update-ref refs/remotes/origin/main "$expected_commit"
+            source_changed=1
             git reset --hard "$expected_commit"
             git log --oneline -1
-            sudo -n true
-            docker compose build --no-cache
-            # The old container keeps serving until the new image builds.
-            # Compose then replaces it only after a successful build.
-            docker compose up -d --remove-orphans
-            docker compose ps
-
-            # Keep the host nginx config in lockstep with the repository.
-            # Roll back the file if validation fails; the running nginx stays untouched.
-            nginx_site=/etc/nginx/sites-available/blog.cogod.cn
-            nginx_enabled=/etc/nginx/sites-enabled/blog.cogod.cn
-            nginx_backup=$(mktemp)
-            had_nginx_site=0
-            if sudo -n test -f "$nginx_site"; then
-              sudo -n cp "$nginx_site" "$nginx_backup"
-              had_nginx_site=1
-            fi
-            if ! sudo -n install -m 0644 host-nginx.conf "$nginx_site" || \
-               ! sudo -n ln -sfn "$nginx_site" "$nginx_enabled" || \
-               ! sudo -n nginx -t; then
-              if [ "$had_nginx_site" = 1 ]; then
-                sudo -n install -m 0644 "$nginx_backup" "$nginx_site"
-              else
-                sudo -n rm -f "$nginx_site" "$nginx_enabled"
-              fi
-              rm -f "$nginx_backup"
-              echo "nginx config validation failed; previous config restored"
-              exit 1
-            fi
-            sudo -n systemctl reload nginx
-            rm -f "$nginx_backup"
+            bash scripts/deploy-release.sh "$release_dir/image.tar.gz" "$image" \
+              "$release_dir/health.tsv" "$expected_commit"
           DEPLOY

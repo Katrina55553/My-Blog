@@ -12,18 +12,20 @@ interface Props {
 
 const { headings, articleSlug } = Astro.props;
 const hasToc = headings.length > 0;
-const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed';
+const storageKey = articleSlug ? 'toc-collapsed-' + articleSlug : 'toc-collapsed';
 ---
 
 {hasToc && (
   <>
-    <!-- 切换按钮 — 夹在正文和目录之间 -->
     <button
       id="toc-toggle-btn"
-      class="hidden xl:flex shrink-0 sticky top-20 w-7 h-10 items-center justify-center bg-paper-2/60 hover:bg-paper-3 border border-rule rounded-sm text-ink-4 hover:text-vermilion transition-colors cursor-pointer group"
-      aria-label="切换目录"
+      class="hidden xl:flex shrink-0 sticky top-20 w-7 h-10 items-center justify-center bg-paper-2/60 hover:bg-paper-3 border border-rule rounded-sm text-ink-4 hover:text-vermilion transition-colors cursor-pointer"
+      type="button"
+      aria-label="收起目录"
+      aria-controls="toc-sidebar"
+      aria-expanded="true"
     >
-      <svg id="toc-chevron" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg id="toc-chevron" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 6L15 12L9 18" />
       </svg>
     </button>
@@ -31,20 +33,22 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
     <aside
       id="toc-sidebar"
       class="hidden xl:block w-64 shrink-0"
+      data-storage-key={storageKey}
     >
       <div class="toc-scroll sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto">
         <h3 class="label-caps text-ink-2 mb-4 flex items-center gap-2">
           <span class="text-vermilion">§</span> <span lang="en">Contents</span>
         </h3>
-        <nav class="relative">
-          <div class="absolute left-0 top-0 bottom-0 w-px bg-rule"></div>
+        <nav aria-label="文章目录" class="relative">
+          <div class="absolute left-0 top-0 bottom-0 w-px bg-rule" aria-hidden="true"></div>
           <ul class="space-y-1">
             {headings.map((h) => (
               <li>
                 <a
-                  href={`#${h.slug}`}
+                  href={'#' + h.slug}
+                  data-toc-id={h.slug}
                   class="toc-link block font-newsreader text-base leading-relaxed py-1.5 border-l-2 -ml-px border-transparent text-ink-3 hover:text-ink hover:border-rule-2 transition-colors no-underline"
-                  style={`padding-left: ${(h.depth - 2) * 0.75 + 0.75}rem`}
+                  style={'padding-left: ' + ((h.depth - 2) * 0.75 + 0.75) + 'rem'}
                 >
                   {h.text}
                 </a>
@@ -54,112 +58,235 @@ const storageKey = articleSlug ? `toc-collapsed-${articleSlug}` : 'toc-collapsed
         </nav>
       </div>
     </aside>
+
+    <!-- Native details keeps the mobile directory usable without JavaScript. -->
+    <details id="toc-mobile" class="toc-mobile xl:hidden">
+      <summary aria-controls="toc-mobile-links">
+        <span><span class="text-vermilion" aria-hidden="true">§</span> 文章目录</span>
+        <svg class="toc-mobile-chevron w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="m6 9 6 6 6-6" />
+        </svg>
+      </summary>
+      <nav id="toc-mobile-links" class="toc-mobile-panel toc-scroll" aria-label="移动端文章目录">
+        <ul>
+          {headings.map((h) => (
+            <li>
+              <a
+                href={'#' + h.slug}
+                data-toc-id={h.slug}
+                class="toc-link block font-newsreader text-base leading-relaxed py-2 border-l-2 border-transparent text-ink-3 hover:text-ink hover:border-rule-2 no-underline"
+                style={'padding-left: ' + ((h.depth - 2) * 0.75 + 0.75) + 'rem'}
+              >
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </details>
   </>
 )}
 
-<script define:vars={{ storageKey }}>
-  (function initToc() {
-    const sidebar = document.getElementById('toc-sidebar');
-    const toggleBtn = document.getElementById('toc-toggle-btn');
-    const chevron = document.getElementById('toc-chevron');
+<script>
+  const sidebar = document.getElementById('toc-sidebar');
+  const toggleBtn = document.getElementById('toc-toggle-btn');
+  const chevron = document.getElementById('toc-chevron');
+  const mobile = document.querySelector<HTMLDetailsElement>('#toc-mobile');
 
-    if (!sidebar || !toggleBtn || !chevron) return;
+  if (sidebar && toggleBtn && chevron && mobile) {
+    const storageKey = sidebar.dataset.storageKey || 'toc-collapsed';
+    const desktop = window.matchMedia('(min-width: 80rem)');
+    const summary = mobile.querySelector('summary')!;
+    summary.setAttribute('aria-expanded', String(mobile.open));
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc-link'));
+    const article = document.querySelector('article');
+    const header = document.querySelector<HTMLElement>('body > header');
+    const headings = Array.from(article?.querySelectorAll<HTMLElement>('h2[id], h3[id]') || []);
 
-    function collapse() {
-      sidebar.classList.add('!hidden');
-      chevron.style.transform = 'rotate(180deg)';
-      try { localStorage.setItem(storageKey, 'true'); } catch (_) { /* noop */ }
-    }
-
-    function expand() {
-      sidebar.classList.remove('!hidden');
-      chevron.style.transform = 'rotate(0deg)';
-      try { localStorage.removeItem(storageKey); } catch (_) { /* noop */ }
-    }
-
-    toggleBtn.addEventListener('click', () => {
-      if (sidebar.classList.contains('!hidden')) {
-        expand();
-      } else {
-        collapse();
+    function setCollapsed(collapsed: boolean, save = true) {
+      sidebar!.classList.toggle('!hidden', collapsed);
+      toggleBtn!.setAttribute('aria-expanded', String(!collapsed));
+      toggleBtn!.setAttribute('aria-label', collapsed ? '展开目录' : '收起目录');
+      chevron!.style.transform = collapsed ? 'rotate(180deg)' : '';
+      if (save) {
+        try {
+          if (collapsed) localStorage.setItem(storageKey, 'true');
+          else localStorage.removeItem(storageKey);
+        } catch { /* Storage can be blocked without disabling navigation. */ }
       }
+    }
+
+    try { setCollapsed(localStorage.getItem(storageKey) === 'true', false); } catch { /* noop */ }
+    toggleBtn.addEventListener('click', () => {
+      setCollapsed(toggleBtn.getAttribute('aria-expanded') === 'true');
     });
 
-    try {
-      if (localStorage.getItem(storageKey) === 'true') {
-        collapse();
+    mobile.addEventListener('toggle', () => {
+      summary.setAttribute('aria-expanded', String(mobile.open));
+      if (mobile.open) keepActiveVisible(mobile.querySelector('.toc-active'));
+    });
+    mobile.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && mobile.open) {
+        mobile.open = false;
+        summary.focus();
       }
-    } catch (_) { /* noop */ }
+    });
+    desktop.addEventListener('change', () => {
+      mobile.open = false;
+      queueMeasurements();
+    });
 
-    // ===== 滚动监听高亮 =====
-    const headings = [...document.querySelectorAll('h2[id], h3[id]')];
-    const links = document.querySelectorAll('.toc-link');
-
-    if (headings.length === 0 || links.length === 0) return;
-
-    const THRESHOLD = 100;
-
-    function findActiveHeading() {
-      // 在所有标题中查找当前处于视口内的标题
-      const visible = headings
-        .filter((h) => {
-          const rect = h.getBoundingClientRect();
-          return rect.top < window.innerHeight && rect.bottom > THRESHOLD;
-        })
-        .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
-
-      if (visible.length > 0) {
-        return visible[0].id;
-      }
-
-      // 没有标题在视口内：反向查找最后一个已滚过 threshold 的标题
-      for (let i = headings.length - 1; i >= 0; i--) {
-        if (headings[i].getBoundingClientRect().top <= THRESHOLD) {
-          return headings[i].id;
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        const heading = document.getElementById(link.dataset.tocId || '');
+        if (!heading) return;
+        if (!desktop.matches) mobile.open = false;
+        // Keep native hash/history navigation and move keyboard focus into the article.
+        if (!heading.hasAttribute('tabindex')) {
+          heading.setAttribute('tabindex', '-1');
+          heading.addEventListener('blur', () => heading.removeAttribute('tabindex'), { once: true });
         }
-      }
-      return headings[0] ? headings[0].id : null;
+        heading.focus({ preventScroll: true });
+      });
+    });
+
+    let activeId = '';
+    let positions: number[] = [];
+    let headerOffset = 80;
+    let scheduled = false;
+    let needsMeasurement = true;
+
+    function keepActiveVisible(link: Element | null) {
+      if (!(link instanceof HTMLElement)) return;
+      const scroller = link.closest<HTMLElement>('.toc-scroll');
+      if (!scroller || scroller.getClientRects().length === 0) return;
+      const item = link.getBoundingClientRect();
+      const viewport = scroller.getBoundingClientRect();
+      // Scroll the directory only; scrollIntoView can also move the article.
+      if (item.top < viewport.top) scroller.scrollTop -= viewport.top - item.top;
+      else if (item.bottom > viewport.bottom) scroller.scrollTop += item.bottom - viewport.bottom;
     }
 
-    function highlightLink(id) {
-      if (!id) return;
-      links.forEach((l) => {
-        if (l.getAttribute('href') === `#${id}`) {
-          l.classList.add('toc-active');
-          l.scrollIntoView({ block: 'nearest' });
-        } else {
-          l.classList.remove('toc-active');
-        }
+    function highlight(id: string) {
+      if (id === activeId) return;
+      activeId = id;
+      links.forEach((link) => {
+        const active = link.dataset.tocId === id;
+        link.classList.toggle('toc-active', active);
+        if (active) {
+          link.setAttribute('aria-current', 'location');
+          keepActiveVisible(link);
+        } else link.removeAttribute('aria-current');
       });
     }
 
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          highlightLink(findActiveHeading());
-          ticking = false;
-        });
-        ticking = true;
+    function update() {
+      scheduled = false;
+      if (needsMeasurement) {
+        headerOffset = (header?.getBoundingClientRect().height || 64) + 16;
+        positions = headings.map((heading) => heading.getBoundingClientRect().top + window.scrollY);
+        document.documentElement.style.setProperty('--toc-heading-offset', headerOffset + 'px');
+        needsMeasurement = false;
       }
-    }, { passive: true });
+      if (headings.length === 0) return;
+      // Cached document offsets make scroll updates O(log n), without reading every heading's layout.
+      const boundary = window.scrollY + headerOffset + 1;
+      let low = 0;
+      let high = positions.length;
+      while (low < high) {
+        const middle = (low + high) >>> 1;
+        if (positions[middle] <= boundary) low = middle + 1;
+        else high = middle;
+      }
+      highlight(headings[Math.max(0, low - 1)].id);
+    }
 
-    // 页面加载时设置初始高亮
-    highlightLink(findActiveHeading());
-  })();
+    function queueUpdate() {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(update);
+    }
+
+    function queueMeasurements() {
+      needsMeasurement = true;
+      queueUpdate();
+    }
+
+    window.addEventListener('scroll', queueUpdate, { passive: true });
+    window.addEventListener('resize', queueMeasurements, { passive: true });
+    window.addEventListener('load', queueMeasurements, { once: true });
+    if ('ResizeObserver' in window) {
+      const observer = new ResizeObserver(queueMeasurements);
+      if (article) observer.observe(article);
+      if (header) observer.observe(header);
+    }
+    document.fonts?.ready.then(queueMeasurements);
+    queueMeasurements();
+  }
 </script>
 
 <style is:global>
+  article :is(h2, h3)[id] {
+    scroll-margin-top: var(--toc-heading-offset, 5rem);
+  }
   .toc-active {
-    color: #b8412c !important;
-    border-color: #b8412c !important;
+    color: var(--vermilion) !important;
+    border-color: var(--vermilion) !important;
     font-weight: 500;
   }
   .toc-scroll {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule-2) transparent;
+    overscroll-behavior: contain;
   }
-  .toc-scroll::-webkit-scrollbar {
+  .toc-mobile {
+    position: fixed;
+    right: 1rem;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 30;
+  }
+  .toc-mobile summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.75rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--rule-2);
+    border-radius: 0.25rem;
+    background: var(--paper);
+    color: var(--ink-2);
+    box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 0.1);
+    cursor: pointer;
+    list-style: none;
+  }
+  .toc-mobile summary::-webkit-details-marker {
     display: none;
+  }
+  .toc-mobile[open] .toc-mobile-chevron {
+    transform: rotate(180deg);
+  }
+  .toc-mobile-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 0.5rem);
+    width: min(24rem, calc(100vw - 2rem));
+    max-height: min(60vh, calc(100vh - 10rem));
+    max-height: min(60dvh, calc(100dvh - 10rem));
+    overflow-y: auto;
+    padding: 0.75rem;
+    border: 1px solid var(--rule-2);
+    border-radius: 0.25rem;
+    background: var(--paper);
+    box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 0.15);
+  }
+  .toc-link {
+    overflow-wrap: anywhere;
+  }
+  .toc-mobile summary:focus-visible,
+  .toc-link:focus-visible,
+  #toc-toggle-btn:focus-visible {
+    outline: 2px solid var(--vermilion);
+    outline-offset: 3px;
   }
 </style>
