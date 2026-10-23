@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ViewCounter from '../components/ViewCounter.astro';
+import PostCard from '../components/PostCard.astro';
 import Pagination from '../components/Pagination.astro';
 import { POSTS_PER_PAGE } from '../lib/pagination';
 
@@ -15,7 +15,6 @@ for (const post of sorted) {
   grouped.get(year)!.push(post);
 }
 
-const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
 <BaseLayout title="搜索" description="搜索和浏览全部文章" wide="listing">
@@ -55,37 +54,9 @@ const pad = (n: number) => String(n).padStart(2, '0');
             <span class="label-caps text-ink-4" data-year-count>{yearPosts.length} 篇文章</span>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-20 gap-y-10 lg:gap-y-12">
-            {yearPosts.map((post, i) => {
-              const { title, date, tags, description } = post.data;
-              const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
-
-              return (
-                <article class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8" style={`animation-delay: ${Math.min(i, 5) * 90}ms`} data-slug={post.slug} data-search={JSON.stringify([title, ...tags, description])}>
-                  <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
-                    <span class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums" data-entry-number>{pad(i + 1)}</span>
-                    <time class="label-caps text-ink-4" datetime={date.toISOString().slice(0, 10)} lang="en">{formattedDate}</time>
-                    <span class="text-rule-2">·</span>
-                    <ViewCounter slug={post.slug} />
-                  </div>
-                  <h3 class="font-display font-semibold text-ink text-2xl md:text-3xl tracking-tight mb-2 pl-11">
-                    <a
-                      href={`/posts/${post.slug}/`}
-                      class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]"
-                    >
-                      {title}
-                    </a>
-                  </h3>
-                  <p class="font-newsreader text-ink-2 leading-relaxed pl-11 mb-3">{description}</p>
-                  <div class="flex flex-wrap gap-x-4 gap-y-1 pl-11">
-                    {tags.map((tag: string) => (
-                      <a href={`/tags/${tag}/`} class="font-mono text-xs text-ink-3 hover:text-vermilion transition-colors no-underline">
-                        <span class="text-vermilion">#</span>{tag}
-                      </a>
-                    ))}
-                  </div>
-                </article>
-              );
-            })}
+            {yearPosts.map((post, i) => (
+              <PostCard {post} number={i + 1} animationDelay={Math.min(i, 5) * 90} searchable />
+            ))}
           </div>
         </div>
       ))}

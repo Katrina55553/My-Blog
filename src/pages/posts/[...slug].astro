@@ -5,7 +5,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PrevNext from '../../components/PrevNext.astro';
 import ViewCounter from '../../components/ViewCounter.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
-import type { TocHeading } from '../../components/TableOfContents.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -23,7 +22,7 @@ const idx = sorted.findIndex((p) => p.slug === current.slug);
 const prev = idx > 0 ? sorted[idx - 1] : null;
 const next = idx < sorted.length - 1 ? sorted[idx + 1] : null;
 
-const { Content } = await current.render();
+const { Content, headings } = await current.render();
 const { title, date, tags, description } = current.data;
 const markdownWithoutCode = (current.body || '')
   .replace(/```[\s\S]*?```/g, '')
@@ -44,39 +43,7 @@ const formattedDate = date.toLocaleDateString('en-US', {
   timeZone: 'UTC',
 });
 
-// 从 markdown body 中提取 h2/h3 标题，生成目录
-const GithubSlugger = (await import('github-slugger')).default;
-
-function extractHeadings(raw: string): TocHeading[] {
-  const slugger = new GithubSlugger();
-  const headings: TocHeading[] = [];
-  const lines = raw.split('\n');
-  let inCodeBlock = false;
-
-  for (const line of lines) {
-    if (/^```/.test(line)) {
-      inCodeBlock = !inCodeBlock;
-      continue;
-    }
-    if (inCodeBlock) continue;
-
-    const match = line.match(/^(#{2,3})\s+(.+)$/);
-    if (!match) continue;
-
-    const text = match[2]
-      .replace(/`/g, '')
-      .replace(/\\([\\`*_{}[\]()#+\-.!])/g, '$1')
-      .trim();
-
-    const slug = slugger.slug(text);
-    if (slug) {
-      headings.push({ depth: match[1].length, text, slug });
-    }
-  }
-  return headings;
-}
-
-const tocHeadings = extractHeadings(current.body || '');
+const tocHeadings = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 ---
 
 <BaseLayout title={title} description={description} pageType="article" wide>

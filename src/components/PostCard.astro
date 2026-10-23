@@ -1,0 +1,57 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ViewCounter from './ViewCounter.astro';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+  number: number;
+  animationDelay: number;
+  activeTag?: string;
+  searchable?: boolean;
+}
+
+const { post, number, animationDelay, activeTag, searchable = false } = Astro.props;
+const { title, date, tags, description } = post.data;
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<article
+  class="card-rule group reveal min-w-0 lg:border-b border-rule lg:pb-8"
+  style={`animation-delay: ${animationDelay}ms`}
+  data-slug={searchable ? post.slug : undefined}
+  data-search={searchable ? JSON.stringify([title, ...tags, description]) : undefined}
+>
+  <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 mb-2">
+    <span
+      class="font-display text-vermilion font-semibold text-sm w-7 shrink-0 tabular-nums"
+      data-entry-number={searchable ? '' : undefined}
+    >{String(number).padStart(2, '0')}</span>
+    <time class="label-caps text-ink-4" datetime={date.toISOString().slice(0, 10)} lang="en">{formattedDate}</time>
+    <span class="text-rule-2">·</span>
+    <ViewCounter slug={post.slug} />
+  </div>
+  <h3 class="font-display font-semibold text-ink text-2xl md:text-3xl tracking-tight mb-2 pl-11">
+    <a
+      href={`/posts/${post.slug}/`}
+      class="no-underline bg-gradient-to-r from-vermilion to-vermilion bg-[length:0%_2px] bg-no-repeat bg-left-bottom transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]"
+    >
+      {title}
+    </a>
+  </h3>
+  <p class="font-newsreader text-ink-2 leading-relaxed pl-11 mb-3">{description}</p>
+  <div class="flex flex-wrap gap-x-4 gap-y-1 pl-11">
+    {tags.map((tag) => (
+      <a
+        href={`/tags/${tag}/`}
+        class={`font-mono text-xs no-underline transition-colors ${tag === activeTag ? 'text-vermilion font-medium' : 'text-ink-3 hover:text-vermilion'}`}
+      >
+        <span class="text-vermilion">#</span>{tag}
+      </a>
+    ))}
+  </div>
+</article>

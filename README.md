@@ -57,6 +57,7 @@
     │   └── posts/              # Markdown 文章
     ├── components/
     │   ├── Pagination.astro    # 静态页面与搜索结果分页
+    │   ├── PostCard.astro      # 首页、分页、标签与搜索共用文章卡片
     │   ├── PrevNext.astro      # 上一篇/下一篇
     │   ├── TableOfContents.astro # 可折叠文章目录与滚动高亮
     │   └── ViewCounter.astro   # 阅读量统计与缓存

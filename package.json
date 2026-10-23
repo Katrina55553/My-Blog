@@ -20,7 +20,6 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^5.0.0",
-    "github-slugger": "2.0.0",
     "katex": "0.16.46",
     "mermaid": "11.12.0",
     "rehype-katex": "^7.0.1",
