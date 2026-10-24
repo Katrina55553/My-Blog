@@ -1,9 +1,10 @@
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
+const net = require('node:net');
 const os = require('node:os');
 const path = require('node:path');
-const { spawnSync } = require('node:child_process');
+const { spawn } = require('node:child_process');
 const { test } = require('node:test');
 const yaml = require('js-yaml');
 const { createManifest } = require('./deploy-health-manifest.cjs');
@@ -56,6 +57,16 @@ const mockCode = '#!/usr/bin/env node\n(' + function deploymentMock() {
     const url = new URL(args.find((arg) => /^https?:/.test(arg)));
     const preview = url.port === '49152';
     const host = url.protocol === 'https:';
+    const stage = preview ? 'preview' : host ? 'host' : state.currentImage.startsWith('sha256:') ? 'rollback' : 'current';
+    if (process.env.MOCK_HTTP_ORIGIN && stage === state.resetStage && url.pathname === '/') {
+      // Let real curl handle TCP resets and retries; the mock must not infer
+      // retry behavior from flags or turn a failing request into a success.
+      save();
+      const forwarded = args.map(arg => arg === url.href ? `${process.env.MOCK_HTTP_ORIGIN}${url.pathname}` : arg);
+      const result = spawnSync(process.env.MOCK_REAL_CURL, forwarded, { stdio: 'inherit' });
+      if (result.error) process.stderr.write(String(result.error));
+      process.exit(result.status ?? 99);
+    }
     if (state.mode === 'preview-http' && preview) exit(22);
     if (state.mode === 'host-http' && host) exit(22);
     const output = args[args.indexOf('--output') + 1];
@@ -115,23 +126,34 @@ function fixture() {
   return { directory, bin, repo, site, enabled, legacy, bodies, manifest, archive };
 }
 
+function runDeployment(f, stateFile, extraEnv = {}) {
+  // Git Bash prepends system tools, so put the mocks first inside the shell.
+  const binPath = shellPath(f.bin).replace(/^([a-z]):/i, (_, drive) => `/${drive.toLowerCase()}`);
+  return new Promise(resolve => {
+    const child = spawn(bash, ['-c', 'export PATH="$1:$PATH"; shift; exec bash "$@"', 'deployment-test',
+      binPath, shellPath(script), shellPath(f.archive), image, shellPath(f.manifest), commit], {
+      timeout: 60000,
+      env: { ...process.env,
+        MOCK_STATE: stateFile, DEPLOY_REPOSITORY_DIR: shellPath(f.repo), DEPLOY_NGINX_SITE: shellPath(f.site),
+        DEPLOY_NGINX_ENABLED: shellPath(f.enabled), ...extraEnv },
+    });
+    const result = { stdout: '', stderr: '', status: null };
+    child.stdout.on('data', chunk => { result.stdout += chunk; });
+    child.stderr.on('data', chunk => { result.stderr += chunk; });
+    child.on('error', error => { result.error = error; });
+    child.on('close', status => { result.status = status; resolve(result); });
+  });
+}
+
 for (const mode of ['success', 'wrong-commit', 'preview-http', 'container-start', 'stale-html', 'nginx-validation', 'nginx-reload', 'host-http', 'first-install-failure']) {
-  test(`deployment ${mode}`, () => {
+  test(`deployment ${mode}`, async () => {
     const f = fixture();
     try {
       const stateFile = path.join(f.directory, 'state.json');
       const previous = mode !== 'first-install-failure';
       fs.writeFileSync(stateFile, JSON.stringify({ mode: mode === 'first-install-failure' ? 'host-http' : mode, previous,
         currentImage: previous ? previousImage : '', bodies: f.bodies, commands: [], rollbacks: 0, nginxTests: 0, reloads: 0 }));
-      // Git Bash prepends its own system tools at startup, so set PATH inside
-      // the shell to ensure its bundled curl cannot shadow the HTTP mock.
-      const binPath = shellPath(f.bin).replace(/^([a-z]):/i, (_, drive) => `/${drive.toLowerCase()}`);
-      const result = spawnSync(bash, ['-c', 'export PATH="$1:$PATH"; shift; exec bash "$@"', 'deployment-test',
-        binPath, shellPath(script), shellPath(f.archive), image, shellPath(f.manifest), commit], {
-        encoding: 'utf8', timeout: 60000,
-        env: { ...process.env,
-          MOCK_STATE: stateFile, DEPLOY_REPOSITORY_DIR: shellPath(f.repo), DEPLOY_NGINX_SITE: shellPath(f.site), DEPLOY_NGINX_ENABLED: shellPath(f.enabled) },
-      });
+      const result = await runDeployment(f, stateFile);
       const diagnostic = `${result.error || ''}\n${result.stdout}\n${result.stderr}`;
       const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
       assert.equal(result.status, mode === 'success' ? 0 : mode === 'container-start' ? 17 : 1, diagnostic);
@@ -155,6 +177,49 @@ for (const mode of ['success', 'wrong-commit', 'preview-http', 'container-start'
         assert(state.commands.some((args) => args[0] === 'docker' && args[1] === 'tag' && args[2] === previousImage && args[3] === 'my-blog:current'), diagnostic);
       }
     } finally {
+      fs.rmSync(f.directory, { recursive: true, force: true });
+    }
+  });
+}
+
+for (const stage of ['preview', 'current', 'rollback', 'persistent-current']) {
+  test(`deployment handles real TCP resets during ${stage}`, async () => {
+    const f = fixture();
+    const persistent = stage === 'persistent-current';
+    let requests = 0;
+    const server = net.createServer(socket => socket.once('data', () => {
+      requests++;
+      if (requests === 1 || persistent) socket.resetAndDestroy();
+      else {
+        const body = f.bodies['/'];
+        socket.end(`HTTP/1.1 200 OK\r\nContent-Length: ${Buffer.byteLength(body)}\r\nConnection: close\r\n\r\n${body}`);
+      }
+    }));
+    try {
+      await new Promise((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', resolve);
+      });
+      const stateFile = path.join(f.directory, 'state.json');
+      const failed = stage === 'rollback' || persistent;
+      fs.writeFileSync(stateFile, JSON.stringify({ mode: stage === 'rollback' ? 'nginx-validation' : 'success',
+        resetStage: persistent ? 'current' : stage, previous: true, currentImage: previousImage,
+        bodies: f.bodies, commands: [], rollbacks: 0, nginxTests: 0, reloads: 0 }));
+      const result = await runDeployment(f, stateFile, {
+        MOCK_HTTP_ORIGIN: `http://127.0.0.1:${server.address().port}`,
+        MOCK_REAL_CURL: process.platform === 'win32' ? path.join(process.env.SystemRoot, 'System32/curl.exe') : '/usr/bin/curl',
+      });
+      const diagnostic = `${result.error || ''}\n${result.stdout}\n${result.stderr}`;
+      const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+      assert.equal(requests, persistent ? 6 : 2, diagnostic);
+      assert.equal(result.status, failed ? 1 : 0, diagnostic);
+      assert.equal(state.currentImage, failed ? previousImage : 'my-blog:current', diagnostic);
+      assert.equal(state.rollbacks, failed ? 1 : 0, diagnostic);
+      assert.match(result.stderr, /curl: \(56\)/, diagnostic);
+      assert(!result.stderr.includes('Automatic rollback encountered an error'), diagnostic);
+      assert.equal(fs.readFileSync(f.site, 'utf8'), failed ? 'old nginx configuration\n' : 'new nginx configuration\n');
+    } finally {
+      await new Promise(resolve => server.close(resolve));
       fs.rmSync(f.directory, { recursive: true, force: true });
     }
   });

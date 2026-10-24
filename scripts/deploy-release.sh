@@ -36,6 +36,14 @@ restore_nginx_path() {
   fi
 }
 
+fetch_http() {
+  # Docker can publish its port before nginx accepts requests, producing a TCP
+  # reset (curl 56), not just a refused connection. These read-only GETs are safe
+  # to retry; keep all health checks, including rollback, on the same policy.
+  curl --fail --silent --show-error --noproxy '*' --connect-timeout 3 --max-time 20 \
+    --retry 5 --retry-delay 1 --retry-all-errors "$@"
+}
+
 finish() {
   local status=$1 rollback_failed=0
   trap - EXIT
@@ -46,8 +54,7 @@ finish() {
       docker tag "$previous_image" my-blog:current || rollback_failed=1
       write_override "$state_dir/rollback.yml" "$previous_image"
       compose "$state_dir/rollback.yml" up -d --no-build --pull never --remove-orphans blog || rollback_failed=1
-      curl --fail --silent --show-error --noproxy '*' --connect-timeout 3 --max-time 20 \
-        --retry 5 --retry-delay 1 --retry-connrefused --output /dev/null http://127.0.0.1:8080/ || rollback_failed=1
+      fetch_http --output /dev/null http://127.0.0.1:8080/ || rollback_failed=1
     else
       # A failed first installation has no older service to restore.
       compose "$state_dir/release.yml" rm --stop --force blog || rollback_failed=1
@@ -77,9 +84,7 @@ check_http() {
   shift
   while IFS=$'\t' read -r checksum resource extra; do
     [[ "$checksum" =~ ^[a-f0-9]{64}$ && "$resource" == /* && -z "${extra:-}" ]] || return 1
-    curl --fail --silent --show-error --noproxy '*' \
-      --connect-timeout 3 --max-time 20 --retry 5 --retry-delay 1 --retry-connrefused \
-      "$@" --output "$state_dir/response" "$base$resource" || return 1
+    fetch_http "$@" --output "$state_dir/response" "$base$resource" || return 1
     if ! printf '%s  %s\n' "$checksum" "$state_dir/response" | sha256sum --check --status; then
       echo "Health check content mismatch: $base$resource" >&2
       return 1
